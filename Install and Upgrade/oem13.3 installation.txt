@@ -1,0 +1,6 @@
+-- install database pre-requisite
+wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm
+wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm
+wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-server-12cR2-preinstall-1.0-5.el7.x86_64.rpm
+
+yum install -y  http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-server-12cR2-preinstall-1.0-5.el7.x86_64.rpm
