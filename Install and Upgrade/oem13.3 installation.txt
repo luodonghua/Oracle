@@ -1,6 +1,13 @@
--- install database pre-requisite
-wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm
-wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-preinstall-19c-1.0-1.el7.x86_64.rpm
-wget http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-server-12cR2-preinstall-1.0-5.el7.x86_64.rpm
+yum install -y wget zip unzip
 
-yum install -y  http://yum.oracle.com/repo/OracleLinux/OL7/latest/getPackage/oracle-database-server-12cR2-preinstall-1.0-5.el7.x86_64.rpm
+# install database pre-requisite (http://yum.oracle.com/)
+
+wget http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol7 -O /etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+cd /etc/yum.repos.d/
+wget http://public-yum.oracle.com/public-yum-ol7.repo
+rpm -e centos-release-7-7.1908.0.el7.centos.x86_64 --nodeps
+yum install oracle-database-server-12cR2-preinstall -y
+more /var/log/oracle-database-server-12cR2-preinstall/results/orakernel.log
+sysctl -p
+
+
