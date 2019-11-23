@@ -1,3 +1,11 @@
+SQL> select banner from v$version;
+
+BANNER
+--------------------------------------------------------------------------------
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+
+
+
 SQL> select role from dba_roles order by role;
 
 ROLE
