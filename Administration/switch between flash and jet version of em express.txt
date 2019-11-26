@@ -1,0 +1,48 @@
+To revert to Flash Oracle EM Express:
+
+SQL> @?/rdbms/admin/execemx emx
+
+To return to JET Oracle EM Express, use the following command:
+
+SQL> @?/rdbms/admin/execemx omx
+
+
+Example:
+
+[(orcl)oracle@oracle19c ~]$ sqlplus / as sysdba
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Nov 26 21:05:58 2019
+Version 19.5.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.5.0.0.0
+
+SQL> @?/rdbms/admin/execemx omx
+
+Session altered.
+
+
+no rows selected
+
+old   1: select nvl( '&1','omx') p1 from dual
+new   1: select nvl( 'omx','omx') p1 from dual
+
+P1
+---
+omx
+
+
+PL/SQL procedure successfully completed.
+
+
+Session altered.
+
+SQL> 
+SQL> 
+SQL> exit
+Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.5.0.0.0
