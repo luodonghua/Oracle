@@ -1,3 +1,20 @@
+/*
+
+Note: Do not use the VARCHAR data type. Use the VARCHAR2 data type instead. 
+Although the VARCHAR data type is currently synonymous with VARCHAR2, 
+the VARCHAR data type is scheduled to be redefined as a separate data type used 
+for variable-length character strings compared with different comparison semantics.
+
+*/
+
+/*
+Comparison semantics
+
+When you need ANSI compatibility in comparison semantics, use the CHAR data type. 
+When trailing blanks are important in string comparisons, use the VARCHAR2 data type.
+
+*/
+
 
 [(orcl)oracle@oracle19c ~]$ sql donghua/myPass@orclpdb
 
