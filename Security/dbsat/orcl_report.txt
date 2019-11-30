@@ -1,0 +1,2576 @@
+### Oracle Database Security Assessment - Highly Confidential ###
+
+* Assessment Date & Time *
+Date of Data Collection  Date of Report           Reporter Version           
+------------------------ ------------------------ ---------------------------
+Sat Nov 30 2019 22:24:00 Sat Nov 30 2019 22:27:53 2.2 (September 2019) - 5150
+
+* Database Identity *
+Name Container (Type:ID) Platform         Database Role Log Mode   Created                 
+---- ------------------- ---------------- ------------- ---------- ------------------------
+ORCL CDB$ROOT (Root:1)   Linux x86 64-bit PRIMARY       ARCHIVELOG Fri Oct 18 2019 22:34:00
+
+### Summary ###
+
+Section                     Pass Evaluate Advisory Low Risk Medium Risk High Risk Total Findings
+--------------------------- ---- -------- -------- -------- ----------- --------- --------------
+Basic Information              1        0        0        0           0         0              1
+User Accounts                  7        0        0        4           1         0             12
+Privileges and Roles           5       15        0        1           1         0             22
+Authorization Control          0        0        2        0           0         0              2
+Fine-Grained Access Control    0        0        5        0           0         0              5
+Auditing                       4        5        1        0           3         0             13
+Encryption                     0        1        1        0           0         0              2
+Database Configuration         8        3        0        2           2         0             15
+Network Configuration          1        1        0        0           3         0              5
+Operating System               1        1        0        2           1         0              5
+Total                         27       26        9        9          11         0             82
+
+### Basic Information ###
+
+* Database Version *
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Security options used: (none)                                         
+
+* Security Features *
+Feature                               Currently Used
+------------------------------------- --------------
+USER AUTHENTICATION                                 
+Password Authentication                    Yes      
+Global Authentication                       No      
+External Authentication                     No      
+                                                    
+AUTHORIZATION CONTROL                               
+Database Vault                              No      
+Privilege Analysis                          No      
+                                                    
+ENCRYPTION                                          
+Tablespace Encryption                       No      
+Column Encryption                           No      
+Network Encryption                          No      
+                                                    
+AUDITING                                            
+Unified Audit                              Yes      
+Fine Grained Audit                          No      
+Traditional Audit                          Yes      
+                                                    
+FINE-GRAINED ACCESS CONTROL                         
+Virtual Private Database                    No      
+Real Application Security                   No      
+Label Security                              No      
+Data Redaction                              No      
+Transparent Sensitive Data Protection       No      
+
+* Patch Check *
+Status: Pass
+Summary:
+    Latest comprehensive patch has been applied.
+Details:
+    Latest comprehensive patch: Oct 09 2019 (52 days ago)
+
+    Binary Patch Inventory:
+    Patch ID (Comprehensive): 23151502 (created October 2019)
+
+    SQL Patch History:
+    Action time: Sun Nov 10 2019 13:21:00
+    Action: APPLY
+    Version: 19.5.0.0.0
+    Description: OJVM RELEASE UPDATE: 19.5.0.0.191015 (30128191)
+
+    Action time: Sun Nov 10 2019 13:01:00
+    Action: APPLY
+    Version: 19.5.0.0.0
+    Description: Database Release Update : 19.5.0.0.191015 (30125133)
+
+    Action time: Fri Oct 18 2019 22:39:00
+    Action: APPLY
+    Version: 19.3.0.0.0
+    Description: Database Release Update : 19.3.0.0.190416 (29517242)
+Remarks:
+    It is vital to keep the database software up-to-date with security
+    fixes as they are released. Oracle issues comprehensive patches in the
+    form of Release Updates, Patch Set Updates, and Bundle Patches on a
+    regular quarterly schedule. These updates should be applied as soon as
+    they are available.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 1.1
+    Oracle Database 12c STIG  v1 r10: Rule SV-76029r2
+
+### User Accounts ###
+
+    Note: Predefined Oracle accounts which are locked are not included in
+    this report. To include all user accounts, run the report with the -a
+    option.
+
+* User Accounts *
+User Name      Status Profile Tablespace Oracle Defined Auth Type
+-------------- ------ ------- ---------- -------------- ---------
+C##DONGHUA     OPEN   DEFAULT USERS            No       PASSWORD 
+C##REMOTE_USER OPEN   DEFAULT USERS            No       PASSWORD 
+SYS            OPEN   DEFAULT SYSTEM          Yes       PASSWORD 
+SYSTEM         OPEN   DEFAULT SYSTEM          Yes       PASSWORD 
+
+* User Schemas in SYSTEM or SYSAUX Tablespace *
+Status: Pass
+Summary:
+    No user data is stored in SYSTEM and SYSAUX tablespace by default.
+Remarks:
+    The SYSTEM and SYSAUX tablespaces are reserved for Oracle-supplied user
+    accounts. To avoid a possible denial of service caused by exhausting
+    these resources, regular user schemas should not use these tablespaces.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75949r2, SV-75951r3
+
+* Sample Schemas *
+Status: Pass
+Summary:
+    No sample schemas found.
+Remarks:
+    Sample schemas are well-known accounts provided by Oracle to serve as
+    simple examples for developers. They generally serve no purpose in a
+    production database and should be removed because they unnecessarily
+    increase the attack surface of the database.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 1.3
+    Oracle Database 12c STIG  v1 r10: Rule SV-76167r3
+
+* Inactive Users *
+Status: Low Risk
+Summary:
+    Found 4 user accounts that would remain open even if inactive. Found 2
+    unlocked users inactive for more than 30 days.
+Details:
+    Users with unlimited INACTIVE_ACCOUNT_TIME: C##DONGHUA, C##REMOTE_USER,
+        SYS, SYSTEM
+    Inactive users: C##REMOTE_USER, SYS
+Remarks:
+    If a user account is no longer in use, it increases the attack surface
+    of the system unnecessarily while providing no corresponding benefit.
+    Furthermore, unauthorized use is less likely to be noticed when no one
+    is regularly using the account. Accounts that have been unused for more
+    than 30 days should be investigated to determine whether they should
+    remain active. A solution is to set INACTIVE_ACCOUNT_TIME in the
+    profiles assigned to users to automatically lock accounts which have
+    not logged in to the database instance in a specified number of days.
+    It is also recommended to audit infrequently used accounts for
+    unauthorized activities.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76207r2
+
+* Users with Expired Passwords *
+Status: Low Risk
+Summary:
+    Found 1 unlocked user with password expired for more than 30 days.
+Details:
+    Users with expired passwords: SYS
+Remarks:
+    Password expiration is used to ensure that users change their passwords
+    on a regular basis. If a user's password has been expired for more than
+    30 days, it indicates that the user has not logged in for at least that
+    long. Accounts that have been unused for an extended period of time
+    should be investigated to determine whether they should remain active.
+
+* Case-Sensitive Passwords *
+Status: Pass
+Summary:
+    Case-sensitive passwords are used.
+Details:
+    SEC_CASE_SENSITIVE_LOGON=TRUE
+Remarks:
+    Case-sensitive passwords are recommended because including both upper
+    and lower-case letters greatly increases the set of possible passwords
+    that must be searched by an attacker who is attempting to guess a
+    password by exhaustive search. Setting SEC_CASE_SENSITIVE_LOGON to TRUE
+    ensures that the database distinguishes between upper and lower-case
+    letters in passwords.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.12
+
+* Users with Default Passwords *
+Status: Pass
+Summary:
+    No unlocked user accounts are using default password.
+Remarks:
+    Default passwords for predefined Oracle accounts are well known and
+    provide a trivial means of entry for attackers. Well-known passwords
+    for locked accounts should be changed as well.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 1.2
+    Oracle Database 12c STIG  v1 r10: Rule SV-76031r1, SV-76339r1
+
+* Minimum Client Authentication Version *
+Status: Low Risk
+Summary:
+    Minimum client version is not configured correctly.
+Details:
+    SQLNET.ALLOWED_LOGON_VERSION_SERVER is not set (default value = 12).
+        Recommended value is 12a.
+Remarks:
+    Over time, Oracle releases have added support for increasingly secure
+    versions of the algorithm used for password authentication of user
+    accounts. In order to remain compatible with older client software, the
+    database continues to support previous password versions as well. The
+    sqlnet.ora parameter ALLOWED_LOGON_VERSION_SERVER determines the
+    minimum password version that the database will accept. For maximum
+    security, this parameter should be set to the highest value supported
+    by the database once all client systems have been upgraded.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76025r2
+
+* Password Verifiers *
+Status: Pass
+Summary:
+    All user accounts are authenticated using the latest password verifier
+    version.  No user accounts have HTTP verifiers.
+Details:
+    Database supports password versions up to 12c.
+    Users authenticated using the prior weaker password verifiers: (none)
+
+    Users with HTTP verifiers: (none)
+Remarks:
+    For each user account, the database may store multiple verifiers, which
+    are hashes of the user password. Each verifier supports a different
+    version of the password authentication algorithm. Every user account
+    should include a verifier for the latest password version supported by
+    the database so that the user can be authenticated using the latest
+    algorithm supported by the client. When all clients have been updated,
+    the security of user accounts can be improved by removing the obsolete
+    verifiers. HTTP password verifiers are used for XML Database
+    authentication. Use the ALTER USER command to remove these verifiers
+    from user accounts that do not require this access.
+
+* User Parameters *
+Status: Pass
+Summary:
+    Examined 2 initialization parameters. No issues found.
+Details:
+    SEC_MAX_FAILED_LOGIN_ATTEMPTS=3
+    RESOURCE_LIMIT=TRUE
+Remarks:
+    SEC_MAX_FAILED_LOGIN_ATTEMPTS configures the maximum number of failed
+    login attempts in a single session before the connection is closed.
+    This is independent of the user profile parameter
+    FAILED_LOGIN_ATTEMPTS, which controls locking the user account after
+    multiple failed login attempts.
+    Not controlling failed login attempts before closing the connection and
+    locking accounts after a number of failed logins, opens the door for
+    successful brute-force login attacks and the occurrence of Denial-of-
+    Service.
+    RESOURCE_LIMIT should be set to TRUE to enable enforcement of any
+    resource constraints set in user profiles.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.13, 2.2.19
+    Oracle Database 12c STIG  v1 r10: Rule SV-76305r4
+
+* User Profiles *
+Profile Name     Parameter                Value                      
+---------------- ------------------------ ---------------------------
+DEFAULT          (Number of Users)        4                          
+DEFAULT          CONNECT_TIME             UNLIMITED                  
+DEFAULT          FAILED_LOGIN_ATTEMPTS    10                         
+DEFAULT          IDLE_TIME                UNLIMITED                  
+DEFAULT          INACTIVE_ACCOUNT_TIME    UNLIMITED                  
+DEFAULT          PASSWORD_GRACE_TIME      7 day(s)                   
+DEFAULT          PASSWORD_LIFE_TIME       180 day(s)                 
+DEFAULT          PASSWORD_LOCK_TIME       1 day(s)                   
+DEFAULT          PASSWORD_REUSE_MAX       UNLIMITED                  
+DEFAULT          PASSWORD_REUSE_TIME      UNLIMITED                  
+DEFAULT          PASSWORD_VERIFY_FUNCTION NULL                       
+ORA_STIG_PROFILE (Number of Users)        0                          
+ORA_STIG_PROFILE CONNECT_TIME             UNLIMITED (DEFAULT)        
+ORA_STIG_PROFILE FAILED_LOGIN_ATTEMPTS    3                          
+ORA_STIG_PROFILE IDLE_TIME                15 minute(s)               
+ORA_STIG_PROFILE INACTIVE_ACCOUNT_TIME    35 day(s)                  
+ORA_STIG_PROFILE PASSWORD_GRACE_TIME      5 day(s)                   
+ORA_STIG_PROFILE PASSWORD_LIFE_TIME       60 day(s)                  
+ORA_STIG_PROFILE PASSWORD_LOCK_TIME       UNLIMITED                  
+ORA_STIG_PROFILE PASSWORD_REUSE_MAX       10                         
+ORA_STIG_PROFILE PASSWORD_REUSE_TIME      365 day(s)                 
+ORA_STIG_PROFILE PASSWORD_VERIFY_FUNCTION ORA12C_STIG_VERIFY_FUNCTION
+
+* Users with Unlimited Password Lifetime *
+Status: Low Risk
+Summary:
+    Password expiration is configured for all users. Found 4 users with no
+    limits on password reuse. Found 4 users with no minimum time before
+    password reuse. All user accounts will lock after password expiration.
+Details:
+    PASSWORD_LIFE_TIME:
+    Profiles with limited password lifetime: DEFAULT (180 days),
+        ORA_STIG_PROFILE (60 days)
+    Profiles with unlimited password lifetime: (none)
+    Users with unlimited password lifetime: (none)
+
+    PASSWORD_REUSE_MAX:
+    Profiles with limits on password reuse: ORA_STIG_PROFILE (10 times)
+    Profiles without limits on password reuse: DEFAULT
+    Users without limits on password reuse: C##DONGHUA, C##REMOTE_USER,
+        SYS, SYSTEM
+
+    PASSWORD_REUSE_TIME:
+    Profiles with minimum time before password reuse: ORA_STIG_PROFILE (365
+        days)
+    Profiles without minimum time before password reuse: DEFAULT
+    Users without minimum time before password reuse: C##DONGHUA,
+        C##REMOTE_USER, SYS, SYSTEM
+
+    PASSWORD_GRACE_TIME:
+    Profiles with locking after password expiration: DEFAULT (7 days),
+        ORA_STIG_PROFILE (5 days)
+    Profiles without locking after password expiration: (none)
+    Users without locking after password expiration: (none)
+Remarks:
+    Password expiration is used to ensure that users change their passwords
+    on a regular basis. It also provides a mechanism to automatically
+    disable temporary accounts. Passwords that never expire may remain
+    unchanged for an extended period of time. When passwords do not have to
+    be changed regularly, users are also more likely to use the same
+    passwords for multiple accounts.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 3.3, 3.4, 3.5,
+    3.6
+    Oracle Database 12c STIG  v1 r10: Rule SV-76047r2, SV-76051r3, SV-
+    76211r2, SV-76229r2
+
+* Account Locking after Failed Login Attempts *
+Status: Pass
+Summary:
+    User accounts are configured to prevent brute force password attacks by
+    locking the account after a number of failed login attempts. User
+    accounts are configured to stay locked for a minimum duration after
+    being locked due to failed login attempt.
+Details:
+    FAILED_LOGIN_ATTEMPTS:
+    Profiles with limited failed login attempts: DEFAULT (10),
+        ORA_STIG_PROFILE (3)
+    Profiles with unlimited failed login attempts: (none)
+    Users with unlimited failed login attempts: (none)
+
+    PASSWORD_LOCK_TIME:
+    Profiles with minimum lock time: DEFAULT (1 day)
+    Profiles without minimum lock time: ORA_STIG_PROFILE
+    Users without minimum lock time: (none)
+Remarks:
+    Attackers sometimes attempt to guess a user's password by simply trying
+    all possibilities from a set of common passwords. To defend against
+    this attack, it is advisable to use the FAILED_LOGIN_ATTEMPTS and
+    PASSWORD_LOCK_TIME profile resources to lock user accounts for a
+    specified time when there are multiple failed login attempts without a
+    successful login.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 3.1, 3.2
+    Oracle Database 12c STIG  v1 r10: Rule SV-76047r2, SV-76093r2, SV-
+    76095r2, SV-76097r2
+
+* Password Verification Functions *
+Status: Medium Risk
+Summary:
+    Found 4 users not using password verification function.
+Details:
+    Profiles with password verification function: ORA_STIG_PROFILE
+        (ORA12C_STIG_VERIFY_FUNCTION)
+    Profiles without password verification function: DEFAULT
+    Users without password verification function: C##DONGHUA,
+        C##REMOTE_USER, SYS, SYSTEM
+Remarks:
+    Password verification functions are used to ensure that user passwords
+    meet minimum requirements for complexity, which may include factors
+    such as length, use of numbers or punctuation characters, difference
+    from previous passwords, etc. Oracle supplies several predefined
+    functions, or a custom PL/SQL function can be used. Every user profile
+    should include a password verification function.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 3.8
+    Oracle Database 12c STIG  v1 r10: Rule SV-76209r1, SV-76213r1, SV-
+    76215r1 , SV-76217r1, SV-76219r1, SV-76221r1, SV-76225r1
+
+### Privileges and Roles ###
+
+* System Privilege Grants *
+Status: Evaluate
+Summary:
+    2 out of 4 users have been directly or indirectly granted system
+    privileges via 239 grants.  1 user is granted system privileges with
+    admin option via 14 grants.  2 users are granted 10 system privileges
+    directly.
+Details:
+    Users directly or indirectly granted each system privilege:
+
+    ADMINISTER ANY SQL TUNING SET: SYSTEM
+    ADMINISTER DATABASE TRIGGER: SYSTEM
+    ADMINISTER RESOURCE MANAGER: SYSTEM
+    ADMINISTER SQL MANAGEMENT OBJECT: SYSTEM
+    ADMINISTER SQL TUNING SET: SYSTEM
+    ADVISOR: SYSTEM
+    ALTER ANY ANALYTIC VIEW: SYSTEM
+    ALTER ANY ASSEMBLY: SYSTEM
+    ALTER ANY ATTRIBUTE DIMENSION: SYSTEM
+    ALTER ANY CLUSTER: SYSTEM
+    ALTER ANY CUBE: SYSTEM
+    ALTER ANY CUBE BUILD PROCESS: SYSTEM
+    ALTER ANY CUBE DIMENSION: SYSTEM
+    ALTER ANY DIMENSION: SYSTEM
+    ALTER ANY EDITION: SYSTEM
+    ALTER ANY EVALUATION CONTEXT: SYSTEM
+    ALTER ANY HIERARCHY: SYSTEM
+    ALTER ANY INDEX: SYSTEM
+    ALTER ANY INDEXTYPE: SYSTEM
+    ALTER ANY LIBRARY: SYSTEM
+    ALTER ANY MATERIALIZED VIEW: SYSTEM
+    ALTER ANY MEASURE FOLDER: SYSTEM
+    ALTER ANY MINING MODEL: SYSTEM
+    ALTER ANY OPERATOR: SYSTEM
+    ALTER ANY OUTLINE: SYSTEM
+    ALTER ANY PROCEDURE: SYSTEM
+    ALTER ANY ROLE: SYSTEM
+    ALTER ANY RULE: SYSTEM
+    ALTER ANY RULE SET: SYSTEM
+    ALTER ANY SEQUENCE: SYSTEM
+    ALTER ANY SQL PROFILE: SYSTEM
+    ALTER ANY SQL TRANSLATION PROFILE: SYSTEM
+    ALTER ANY TABLE: SYSTEM
+    ALTER ANY TRIGGER: SYSTEM
+    ALTER ANY TYPE: SYSTEM
+    ALTER DATABASE: SYSTEM
+    ALTER LOCKDOWN PROFILE: SYSTEM
+    ALTER PROFILE: SYSTEM
+    ALTER RESOURCE COST: SYSTEM
+    ALTER ROLLBACK SEGMENT: SYSTEM
+    ALTER SESSION: SYSTEM
+    ALTER SYSTEM: SYSTEM
+    ALTER TABLESPACE: SYSTEM
+    ALTER USER: SYSTEM
+    ANALYZE ANY: SYSTEM
+    ANALYZE ANY DICTIONARY: SYSTEM
+    AUDIT ANY: SYSTEM
+    AUDIT SYSTEM: SYSTEM
+    BACKUP ANY TABLE: SYSTEM
+    BECOME USER: SYSTEM
+    CHANGE NOTIFICATION: SYSTEM
+    COMMENT ANY MINING MODEL: SYSTEM
+    COMMENT ANY TABLE: SYSTEM
+    CREATE ANALYTIC VIEW: SYSTEM
+    CREATE ANY ANALYTIC VIEW: SYSTEM
+    CREATE ANY ASSEMBLY: SYSTEM
+    CREATE ANY ATTRIBUTE DIMENSION: SYSTEM
+    CREATE ANY CLUSTER: SYSTEM
+    CREATE ANY CONTEXT: SYSTEM
+    CREATE ANY CREDENTIAL: SYSTEM(*)
+    CREATE ANY CUBE: SYSTEM
+    CREATE ANY CUBE BUILD PROCESS: SYSTEM
+    CREATE ANY CUBE DIMENSION: SYSTEM
+    CREATE ANY DIMENSION: SYSTEM
+    CREATE ANY DIRECTORY: SYSTEM
+    CREATE ANY EDITION: SYSTEM
+    CREATE ANY EVALUATION CONTEXT: SYSTEM
+    CREATE ANY HIERARCHY: SYSTEM
+    CREATE ANY INDEX: SYSTEM
+    CREATE ANY INDEXTYPE: SYSTEM
+    CREATE ANY JOB: SYSTEM(*)
+    CREATE ANY LIBRARY: SYSTEM
+    CREATE ANY MATERIALIZED VIEW: SYSTEM
+    CREATE ANY MEASURE FOLDER: SYSTEM
+    CREATE ANY MINING MODEL: SYSTEM
+    CREATE ANY OPERATOR: SYSTEM
+    CREATE ANY OUTLINE: SYSTEM
+    CREATE ANY PROCEDURE: SYSTEM
+    CREATE ANY RULE: SYSTEM
+    CREATE ANY RULE SET: SYSTEM
+    CREATE ANY SEQUENCE: SYSTEM
+    CREATE ANY SQL PROFILE: SYSTEM
+    CREATE ANY SQL TRANSLATION PROFILE: SYSTEM
+    CREATE ANY SYNONYM: SYSTEM
+    CREATE ANY TABLE: SYSTEM
+    CREATE ANY TRIGGER: SYSTEM
+    CREATE ANY TYPE: SYSTEM
+    CREATE ANY VIEW: SYSTEM
+    CREATE ASSEMBLY: SYSTEM
+    CREATE ATTRIBUTE DIMENSION: SYSTEM
+    CREATE CLUSTER: SYSTEM
+    CREATE CREDENTIAL: SYSTEM(*)
+    CREATE CUBE: SYSTEM
+    CREATE CUBE BUILD PROCESS: SYSTEM
+    CREATE CUBE DIMENSION: SYSTEM
+    CREATE DATABASE LINK: SYSTEM
+    CREATE DIMENSION: SYSTEM
+    CREATE EVALUATION CONTEXT: SYSTEM(*)
+    CREATE EXTERNAL JOB: SYSTEM(*)
+    CREATE HIERARCHY: SYSTEM
+    CREATE INDEXTYPE: SYSTEM
+    CREATE JOB: SYSTEM(*)
+    CREATE LIBRARY: SYSTEM
+    CREATE LOCKDOWN PROFILE: SYSTEM
+    CREATE MATERIALIZED VIEW: SYSTEM(D)
+    CREATE MEASURE FOLDER: SYSTEM
+    CREATE MINING MODEL: SYSTEM
+    CREATE OPERATOR: SYSTEM
+    CREATE PLUGGABLE DATABASE: C##REMOTE_USER(D), SYSTEM
+    CREATE PROCEDURE: SYSTEM
+    CREATE PROFILE: SYSTEM
+    CREATE PUBLIC DATABASE LINK: SYSTEM
+    CREATE PUBLIC SYNONYM: SYSTEM
+    CREATE ROLE: SYSTEM
+    CREATE ROLLBACK SEGMENT: SYSTEM
+    CREATE RULE: SYSTEM(*)
+    CREATE RULE SET: SYSTEM(*)
+    CREATE SEQUENCE: SYSTEM
+    CREATE SESSION: C##REMOTE_USER(D), SYSTEM
+    CREATE SQL TRANSLATION PROFILE: SYSTEM
+    CREATE SYNONYM: SYSTEM
+    CREATE TABLE: SYSTEM(D)
+    CREATE TABLESPACE: SYSTEM
+    CREATE TRIGGER: SYSTEM
+    CREATE TYPE: SYSTEM
+    CREATE USER: SYSTEM
+    CREATE VIEW: SYSTEM
+    DEBUG ANY PROCEDURE: SYSTEM
+    DEBUG CONNECT ANY: SYSTEM
+    DEBUG CONNECT SESSION: SYSTEM
+    DELETE ANY CUBE DIMENSION: SYSTEM
+    DELETE ANY MEASURE FOLDER: SYSTEM
+    DELETE ANY TABLE: SYSTEM
+    DEQUEUE ANY QUEUE: SYSTEM(D)(*)
+    DROP ANY ANALYTIC VIEW: SYSTEM
+    DROP ANY ASSEMBLY: SYSTEM
+    DROP ANY ATTRIBUTE DIMENSION: SYSTEM
+    DROP ANY CLUSTER: SYSTEM
+    DROP ANY CONTEXT: SYSTEM
+    DROP ANY CUBE: SYSTEM
+    DROP ANY CUBE BUILD PROCESS: SYSTEM
+    DROP ANY CUBE DIMENSION: SYSTEM
+    DROP ANY DIMENSION: SYSTEM
+    DROP ANY DIRECTORY: SYSTEM
+    DROP ANY EDITION: SYSTEM
+    DROP ANY EVALUATION CONTEXT: SYSTEM
+    DROP ANY HIERARCHY: SYSTEM
+    DROP ANY INDEX: SYSTEM
+    DROP ANY INDEXTYPE: SYSTEM
+    DROP ANY LIBRARY: SYSTEM
+    DROP ANY MATERIALIZED VIEW: SYSTEM
+    DROP ANY MEASURE FOLDER: SYSTEM
+    DROP ANY MINING MODEL: SYSTEM
+    DROP ANY OPERATOR: SYSTEM
+    DROP ANY OUTLINE: SYSTEM
+    DROP ANY PROCEDURE: SYSTEM
+    DROP ANY ROLE: SYSTEM
+    DROP ANY RULE: SYSTEM
+    DROP ANY RULE SET: SYSTEM
+    DROP ANY SEQUENCE: SYSTEM
+    DROP ANY SQL PROFILE: SYSTEM
+    DROP ANY SQL TRANSLATION PROFILE: SYSTEM
+    DROP ANY SYNONYM: SYSTEM
+    DROP ANY TABLE: SYSTEM
+    DROP ANY TRIGGER: SYSTEM
+    DROP ANY TYPE: SYSTEM
+    DROP ANY VIEW: SYSTEM
+    DROP LOCKDOWN PROFILE: SYSTEM
+    DROP PROFILE: SYSTEM
+    DROP PUBLIC DATABASE LINK: SYSTEM
+    DROP PUBLIC SYNONYM: SYSTEM
+    DROP ROLLBACK SEGMENT: SYSTEM
+    DROP TABLESPACE: SYSTEM
+    DROP USER: SYSTEM
+    EM EXPRESS CONNECT: SYSTEM
+    ENQUEUE ANY QUEUE: SYSTEM(D)(*)
+    EXECUTE ANY ASSEMBLY: SYSTEM
+    EXECUTE ANY CLASS: SYSTEM(*)
+    EXECUTE ANY EVALUATION CONTEXT: SYSTEM
+    EXECUTE ANY INDEXTYPE: SYSTEM
+    EXECUTE ANY LIBRARY: SYSTEM
+    EXECUTE ANY OPERATOR: SYSTEM
+    EXECUTE ANY PROCEDURE: SYSTEM
+    EXECUTE ANY PROGRAM: SYSTEM(*)
+    EXECUTE ANY RULE: SYSTEM
+    EXECUTE ANY RULE SET: SYSTEM
+    EXECUTE ANY TYPE: SYSTEM
+    EXECUTE ASSEMBLY: SYSTEM
+    EXEMPT REDACTION POLICY: SYSTEM
+    EXPORT FULL DATABASE: SYSTEM
+    FLASHBACK ANY TABLE: SYSTEM
+    FLASHBACK ARCHIVE ADMINISTER: SYSTEM
+    FORCE ANY TRANSACTION: SYSTEM
+    FORCE TRANSACTION: SYSTEM
+    GLOBAL QUERY REWRITE: SYSTEM(D)
+    GRANT ANY OBJECT PRIVILEGE: SYSTEM
+    GRANT ANY PRIVILEGE: SYSTEM
+    GRANT ANY ROLE: SYSTEM
+    IMPORT FULL DATABASE: SYSTEM
+    INSERT ANY CUBE DIMENSION: SYSTEM
+    INSERT ANY MEASURE FOLDER: SYSTEM
+    INSERT ANY TABLE: SYSTEM
+    LOCK ANY TABLE: SYSTEM
+    LOGMINING: SYSTEM
+    MANAGE ANY FILE GROUP: SYSTEM
+    MANAGE ANY QUEUE: SYSTEM(D)(*)
+    MANAGE FILE GROUP: SYSTEM
+    MANAGE SCHEDULER: SYSTEM(*)
+    MANAGE TABLESPACE: SYSTEM
+    MERGE ANY VIEW: SYSTEM
+    ON COMMIT REFRESH: SYSTEM
+    QUERY REWRITE: SYSTEM
+    READ ANY FILE GROUP: SYSTEM
+    READ ANY TABLE: SYSTEM
+    REDEFINE ANY TABLE: SYSTEM
+    RESTRICTED SESSION: SYSTEM
+    RESUMABLE: SYSTEM
+    SELECT ANY CUBE: SYSTEM
+    SELECT ANY CUBE BUILD PROCESS: SYSTEM
+    SELECT ANY CUBE DIMENSION: SYSTEM
+    SELECT ANY DICTIONARY: SYSTEM
+    SELECT ANY MEASURE FOLDER: SYSTEM
+    SELECT ANY MINING MODEL: SYSTEM
+    SELECT ANY SEQUENCE: SYSTEM
+    SELECT ANY TABLE: SYSTEM(D)
+    SELECT ANY TRANSACTION: SYSTEM
+    SET CONTAINER: SYSTEM
+    UNDER ANY TABLE: SYSTEM
+    UNDER ANY TYPE: SYSTEM
+    UNDER ANY VIEW: SYSTEM
+    UNLIMITED TABLESPACE: SYSTEM(D)
+    UPDATE ANY CUBE: SYSTEM
+    UPDATE ANY CUBE BUILD PROCESS: SYSTEM
+    UPDATE ANY CUBE DIMENSION: SYSTEM
+    UPDATE ANY TABLE: SYSTEM
+    USE ANY JOB RESOURCE: SYSTEM
+    USE ANY SQL TRANSLATION PROFILE: SYSTEM
+
+    (*) = granted with admin option
+    (D) = granted directly
+    (C) = granted commonly
+Remarks:
+    System privileges provide the ability to access data or perform
+    administrative operations for the entire database. Consistent with the
+    principle of least privilege, these privileges should be granted
+    sparingly. The Privilege Analysis feature may be helpful to determine
+    the minimum set of privileges required by a user or role. In some
+    cases, it may be possible to substitute a more limited object privilege
+    grant in place of a system privilege grant that applies to all objects.
+    System privileges should be granted with admin option only when the
+    recipient needs the ability to grant the privilege to others.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.7
+    Oracle Database 12c STIG  v1 r10: Rule SV-75923r3, SV-76065r1, SV-
+    76081r3, SV-76299r3
+
+* All Roles *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted roles via 22
+    grants.
+Details:
+    Users directly or indirectly granted each role:
+
+    AQ_ADMINISTRATOR_ROLE: SYSTEM
+    CAPTURE_ADMIN: SYSTEM
+    DATAPUMP_EXP_FULL_DATABASE: SYSTEM
+    DATAPUMP_IMP_FULL_DATABASE: SYSTEM
+    DBA: SYSTEM
+    EM_EXPRESS_ALL: SYSTEM
+    EM_EXPRESS_BASIC: SYSTEM
+    EXECUTE_CATALOG_ROLE: SYSTEM
+    EXP_FULL_DATABASE: SYSTEM
+    GATHER_SYSTEM_STATISTICS: SYSTEM
+    HS_ADMIN_EXECUTE_ROLE: SYSTEM
+    HS_ADMIN_SELECT_ROLE: SYSTEM
+    IMP_FULL_DATABASE: SYSTEM
+    JAVA_ADMIN: SYSTEM
+    OLAP_DBA: SYSTEM
+    OLAP_XS_ADMIN: SYSTEM
+    OPTIMIZER_PROCESSING_RATE: SYSTEM
+    SCHEDULER_ADMIN: SYSTEM
+    SELECT_CATALOG_ROLE: SYSTEM
+    WM_ADMIN_ROLE: SYSTEM
+    XDBADMIN: SYSTEM
+    XDB_SET_INVOKER: SYSTEM
+Remarks:
+    Roles are a convenient way to manage groups of related privileges,
+    especially when the privileges are required for a particular task or
+    job function. Beware of broadly defined roles, which may confer more
+    privileges than an individual recipient requires. Privilege Analysis
+    can be used to determine specific privileges that the recipient
+    actually requires. Roles should be granted with admin option only when
+    the recipient needs the ability to modify the role or grant it to
+    others.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.4.1
+
+* Code Based Access Control *
+Status: Medium Risk
+Summary:
+    Code Based Access Control (CBAC) enabled for 2 Program Units.
+Details:
+    Following Program Units are granted CBAC Roles:
+
+    SYS.DBMS_MDX_ODBO: DBMS_MDX_INTERNAL
+    Users with execute privilege: PUBLIC
+
+    GSMADMIN_INTERNAL.EXCHANGE: DATAPUMP_EXP_FULL_DATABASE,
+        DATAPUMP_IMP_FULL_DATABASE
+    Privileges granted via CBAC role: CREATE SESSION, CREATE TABLE, ALTER
+        DATABASE, ALTER PROFILE, ALTER RESOURCE COST, ALTER USER, AUDIT
+        ANY, AUDIT SYSTEM, CREATE PROFILE, CREATE SESSION, DELETE ANY
+        TABLE, EXECUTE ANY OPERATOR, GRANT ANY OBJECT PRIVILEGE, GRANT ANY
+        PRIVILEGE, GRANT ANY ROLE, SELECT ANY TABLE
+    PUBLIC is granted Execute on Program Units via CBAC Role.
+Remarks:
+    Code Based Access Control (CBAC) can be used to grant additional
+    privileges on program units like PL/SQL functions, procedures, or
+    packages. CBAC allows you to attach database roles to a PL/SQL
+    function, procedure, or package. These database roles are enabled at
+    run time, enabling the program unit to execute with the required
+    privileges in the calling user's environment.
+
+* Account Management Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted account
+    management privileges via 13 grants.  No grants to PUBLIC.
+Details:
+    Grants of ALTER USER, CREATE USER, DROP USER:
+
+    SYSTEM <- DBA: ALTER USER, CREATE USER, DROP USER
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: ALTER USER
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE: ALTER
+        USER, CREATE USER, DROP USER
+    SYSTEM <- DBA <- EM_EXPRESS_ALL: ALTER USER, CREATE USER, DROP USER
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: ALTER USER, CREATE USER, DROP USER
+
+Remarks:
+    Account management privileges (ALTER USER, CREATE USER, DROP USER) can
+    be used to create and modify other user accounts, including changing
+    passwords. This ability can be abused to gain access to another user's
+    account, which may have greater privileges. Users with Account
+    management privileges should be audited.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75935r2
+
+* Role and Privilege Management Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted role and
+    privilege management privileges via 25 grants.  No grants to PUBLIC.
+Details:
+    Grants of ALTER ANY ROLE, CREATE ROLE, DROP ANY ROLE, GRANT ANY OBJECT
+        PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE:
+
+    SYSTEM <- DBA: ALTER ANY ROLE, CREATE ROLE, DROP ANY ROLE, GRANT ANY
+        OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: GRANT ANY OBJECT
+        PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE:
+        CREATE ROLE, DROP ANY ROLE, GRANT ANY OBJECT PRIVILEGE, GRANT ANY
+        PRIVILEGE, GRANT ANY ROLE
+    SYSTEM <- DBA <- EM_EXPRESS_ALL: ALTER ANY ROLE, CREATE ROLE, DROP ANY
+        ROLE, GRANT ANY OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY
+        ROLE
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: CREATE ROLE, DROP ANY ROLE, GRANT
+        ANY OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE
+
+Remarks:
+    Users with role and privilege management privileges (ALTER ANY ROLE,
+    CREATE ROLE, DROP ANY ROLE, GRANT ANY OBJECT PRIVILEGE, GRANT ANY
+    PRIVILEGE, GRANT ANY ROLE) can change the set of roles and privileges
+    granted to themselves and other users. This ability should be granted
+    sparingly, since it can be used to circumvent many security controls in
+    the database. The Privilege Analysis feature may be helpful to
+    determine whether a user or role have used privilege management
+    privileges.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.3.10,
+    4.3.11, 4.3.12
+
+* Database Management Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted database
+    management privilege via 13 grants.  No grants to PUBLIC.
+Details:
+    Grants of ALTER DATABASE, ALTER SYSTEM, CREATE ANY LIBRARY, CREATE
+        LIBRARY, DROP ANY LIBRARY:
+
+    SYSTEM <- DBA: ALTER DATABASE, ALTER SYSTEM, CREATE ANY LIBRARY, CREATE
+        LIBRARY, DROP ANY LIBRARY
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: ALTER DATABASE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE: ALTER
+        DATABASE, CREATE ANY LIBRARY, DROP ANY LIBRARY
+    SYSTEM <- DBA <- EM_EXPRESS_ALL: ALTER SYSTEM
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: ALTER DATABASE, CREATE ANY LIBRARY,
+        DROP ANY LIBRARY
+
+Remarks:
+    Database management privileges (ALTER DATABASE, ALTER SYSTEM, CREATE
+    ANY LIBRARY, CREATE LIBRARY, DROP ANY LIBRARY) can be used to change
+    the operation of the database and potentially bypass security
+    protections. CREATE LIBRARY allows a user to create or replace a
+    library. This ability should be granted only to trusted administrators
+    and should be sufficiently audited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.3.7, 4.3.8,
+    4.3.9
+
+* Audit Management Package *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted EXECUTE on
+    Audit management packages via 6 grants.  No grants to PUBLIC.
+Details:
+    Grants of EXECUTE on DBMS_AUDIT_MGMT:
+
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE <-
+        EXECUTE_CATALOG_ROLE: EXECUTE on DBMS_AUDIT_MGMT
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE <-
+        EXECUTE_CATALOG_ROLE: EXECUTE on DBMS_AUDIT_MGMT
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE <-
+        EXECUTE_CATALOG_ROLE: EXECUTE on DBMS_AUDIT_MGMT
+    SYSTEM <- DBA <- EXECUTE_CATALOG_ROLE: EXECUTE on DBMS_AUDIT_MGMT
+    SYSTEM <- DBA <- EXP_FULL_DATABASE <- EXECUTE_CATALOG_ROLE: EXECUTE on
+        DBMS_AUDIT_MGMT
+    SYSTEM <- DBA <- IMP_FULL_DATABASE <- EXECUTE_CATALOG_ROLE: EXECUTE on
+        DBMS_AUDIT_MGMT
+
+Remarks:
+    The DBMS_AUDIT_MGMT package is used to execute Audit Trail management
+    procedures and functions. Users with the execute privilege can invoke
+    subprograms like CLEAN_AUDIT_TRAIL that deletes audit trail records or
+    files that have been archived. Access should be strictly limited and
+    granted only to users with a legitimate need for this functionality.
+References:
+    Oracle Database 12c STIG  v1 r10: SV-76149r1, SV-76151r1, SV-76153r1
+
+* Audit Management Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted privilege to
+    manage audit policies via 8 grants.  No grants to PUBLIC.
+Details:
+    Grants of AUDIT ANY, AUDIT SYSTEM:
+
+    SYSTEM <- DBA: AUDIT ANY, AUDIT SYSTEM
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: AUDIT ANY, AUDIT SYSTEM
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE: AUDIT
+        ANY, AUDIT SYSTEM
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: AUDIT ANY, AUDIT SYSTEM
+
+Remarks:
+    Audit management privileges (AUDIT ANY, AUDIT SYSTEM) can be used to
+    add, drop and modify the audit policies for the database. This ability
+    should be granted sparingly, since it may be used to hide malicious
+    activity. The Privilege Analysis feature may be helpful to determine
+    whether the audit management privileges have been used by a user or
+    role. Users with these privileges should be sufficiently audited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.3.3
+    Oracle Database 12c STIG  v1 r10: Rule SV-76113r1
+
+* Broad Data Access Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted broad data
+    access privileges via 39 grants.  No grants to PUBLIC.
+Details:
+    Grants of SELECT ANY TABLE, READ ANY TABLE, INSERT ANY TABLE, DELETE
+        ANY TABLE, ALTER ANY TABLE, UPDATE ANY TABLE, CREATE ANY TRIGGER,
+        ALTER ANY TRIGGER, CREATE ANY INDEX, CREATE ANY PROCEDURE, SELECT
+        ANY DICTIONARY:
+
+    SYSTEM: SELECT ANY TABLE
+    SYSTEM <- DBA: ALTER ANY TABLE, ALTER ANY TRIGGER, CREATE ANY INDEX,
+        CREATE ANY PROCEDURE, CREATE ANY TRIGGER, DELETE ANY TABLE, INSERT
+        ANY TABLE, READ ANY TABLE, SELECT ANY DICTIONARY, SELECT ANY TABLE,
+        UPDATE ANY TABLE
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        SELECT ANY TABLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: DELETE ANY TABLE, SELECT
+        ANY TABLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        SELECT ANY TABLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE: ALTER
+        ANY TABLE, ALTER ANY TRIGGER, CREATE ANY INDEX, CREATE ANY
+        PROCEDURE, CREATE ANY TRIGGER, DELETE ANY TABLE, INSERT ANY TABLE,
+        SELECT ANY TABLE, UPDATE ANY TABLE
+    SYSTEM <- DBA <- EXP_FULL_DATABASE: SELECT ANY TABLE
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: ALTER ANY TABLE, ALTER ANY TRIGGER,
+        CREATE ANY INDEX, CREATE ANY PROCEDURE, CREATE ANY TRIGGER, DELETE
+        ANY TABLE, INSERT ANY TABLE, SELECT ANY TABLE, UPDATE ANY TABLE
+    SYSTEM <- DBA <- OLAP_DBA: DELETE ANY TABLE, INSERT ANY TABLE, SELECT
+        ANY TABLE, UPDATE ANY TABLE
+
+Remarks:
+    Users with broad data access privileges (SELECT ANY TABLE, READ ANY
+    TABLE, INSERT ANY TABLE, DELETE ANY TABLE, ALTER ANY TABLE, UPDATE ANY
+    TABLE, CREATE ANY TRIGGER, ALTER ANY TRIGGER, CREATE ANY INDEX, CREATE
+    ANY PROCEDURE, SELECT ANY DICTIONARY) have very broad access to data
+    stored in any schema. Most administrative tasks do not require access
+    to the data itself, so these privileges should be granted rarely even
+    to administrators. Users with direct object privileges on tables that
+    holds sensitive data should also be reviewed. In addition to minimizing
+    grants of these privileges, consider the use of Database Vault realms
+    to limit the use of these privileges to access sensitive data stored in
+    user schemas.
+    Also, the Privilege Analysis feature may be helpful to restrict the use
+    of broad data access privileges required by a user or role. In some
+    cases, it may be possible to substitute a more limited object privilege
+    grant in place of a system privilege grant that applies to all objects.
+    System privileges should be granted with admin option only when the
+    recipient needs the ability to grant the privilege to others.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.3.1, 4.3.2
+
+* Access Control Exemption Privileges *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted access
+    control exemption privileges via 3 grants.  No grants to PUBLIC.
+Details:
+    Grants of EXEMPT ACCESS POLICY, EXEMPT REDACTION POLICY:
+
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        EXEMPT REDACTION POLICY
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        EXEMPT REDACTION POLICY
+    SYSTEM <- DBA <- EXP_FULL_DATABASE: EXEMPT REDACTION POLICY
+
+Remarks:
+    Users with access control exemption privileges (EXEMPT ACCESS POLICY,
+    EXEMPT REDACTION POLICY) can bypass the row and column access control
+    policies enforced by Virtual Private Database and Data Redaction,
+    respectively. Most administrative tasks do not require access to the
+    data itself, so these privileges should be granted rarely even to
+    administrators. Users with these privileges should be sufficiently
+    audited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.3.4
+
+* Access to Password Verifier Tables *
+Status: Pass
+Summary:
+    No users granted read on dictionary tables containing password
+    verifiers No grants to PUBLIC.
+Remarks:
+    Users with READ, SELECT and UPDATE privileges on dictionary tables
+    containing verifiers can access and modify user password verifiers. The
+    verifiers can be used in offline attacks to discover user passwords.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.5.1, 4.5.2,
+    4.5.3, 4.5.4, 4.5.6
+
+* Write Access to Restricted Objects *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted object
+    privileges on Oracle Database restricted objects via 48 grants.  No
+    grants to PUBLIC.
+Details:
+    Grants of DELETE, INSERT, UPDATE on SYS, DVSYS, AUDSYS or LBACSYS
+        objects:
+
+    SYSTEM <- DBA: INSERT on SYS.XSDB$SCHEMA_ACL, UPDATE on
+        SYS.XSDB$SCHEMA_ACL
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        DELETE on SYS.INCEXP, DELETE on SYS.INCFIL, DELETE on SYS.INCVID,
+        INSERT on SYS.INCEXP, INSERT on SYS.INCFIL, INSERT on SYS.INCVID,
+        UPDATE on SYS.INCEXP, UPDATE on SYS.INCFIL, UPDATE on SYS.INCVID
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        DELETE on SYS.INCEXP, DELETE on SYS.INCFIL, DELETE on SYS.INCVID,
+        INSERT on SYS.INCEXP, INSERT on SYS.INCFIL, INSERT on SYS.INCVID,
+        UPDATE on SYS.INCEXP, UPDATE on SYS.INCFIL, UPDATE on SYS.INCVID
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE:
+        DELETE on SYS.EXPIMP_TTS_CT$, DELETE on SYS.RADM_FPTM$, INSERT on
+        SYS.EXPIMP_TTS_CT$, INSERT on SYS.RADM_FPTM$, UPDATE on
+        SYS.EXPIMP_TTS_CT$
+    SYSTEM <- DBA <- EXP_FULL_DATABASE: DELETE on SYS.INCEXP, DELETE on
+        SYS.INCFIL, DELETE on SYS.INCVID, INSERT on SYS.INCEXP, INSERT on
+        SYS.INCFIL, INSERT on SYS.INCVID, UPDATE on SYS.INCEXP, UPDATE on
+        SYS.INCFIL, UPDATE on SYS.INCVID
+    SYSTEM <- DBA <- GATHER_SYSTEM_STATISTICS: DELETE on SYS.AUX_STATS$,
+        DELETE on SYS.WRI$_OPTSTAT_AUX_HISTORY, INSERT on SYS.AUX_STATS$,
+        INSERT on SYS.WRI$_OPTSTAT_AUX_HISTORY, UPDATE on SYS.AUX_STATS$,
+        UPDATE on SYS.WRI$_OPTSTAT_AUX_HISTORY
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: DELETE on SYS.EXPIMP_TTS_CT$,
+        DELETE on SYS.RADM_FPTM$, INSERT on SYS.EXPIMP_TTS_CT$, INSERT on
+        SYS.RADM_FPTM$, UPDATE on SYS.EXPIMP_TTS_CT$
+    SYSTEM <- DBA <- OPTIMIZER_PROCESSING_RATE: DELETE on
+        SYS.OPT_CALIBRATION_STATS$, INSERT on SYS.OPT_CALIBRATION_STATS$,
+        UPDATE on SYS.OPT_CALIBRATION_STATS$
+
+Remarks:
+    Users with these privileges can directly modify objects in the SYS,
+    DVSYS, AUDSYS or LBACSYS schemas. Manipulating these system objects may
+    allow security protections to be circumvented or otherwise interfere
+    with normal operation of the database. PUBLIC must not be granted
+    access to objects in SYS, DVSYS, AUDSYS and LBACSYS schemas. When
+    running a Privilege Analysis Capture, be aware of privileges that have
+    been granted to access objects in any Oracle-created schemas. Review
+    the grants for relevance.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75929r3
+
+* Access to Audit Objects *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted object
+    privileges on audit objects via 7 grants.  No grants to PUBLIC.
+Details:
+    Grants of SELECT, DELETE, INSERT, UPDATE on AUDIT objects:
+
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE <-
+        SELECT_CATALOG_ROLE: SELECT on SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE <-
+        SELECT_CATALOG_ROLE: SELECT on SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE <-
+        SELECT_CATALOG_ROLE: SELECT on SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- EM_EXPRESS_ALL <- EM_EXPRESS_BASIC <-
+        SELECT_CATALOG_ROLE: SELECT on SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- EXP_FULL_DATABASE <- SELECT_CATALOG_ROLE: SELECT on
+        SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- IMP_FULL_DATABASE <- SELECT_CATALOG_ROLE: SELECT on
+        SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+    SYSTEM <- DBA <- SELECT_CATALOG_ROLE: SELECT on
+        SYS.AUDTAB$TBS$FOR_EXPORT_TBL
+
+Remarks:
+    Users with these privileges can directly access and modify objects
+    containing audit information. Access to these objects may allow a
+    malicious user deduce privilege settings for other users and to
+    manipulate the audit information by replacing or deleting audit
+    records.
+    Use Privilege Analysis to identify used and unused access to these
+    privileges. Instead of granting a default role with many privileges
+    such as DBA or SELECT_CATALOG_ROLE, create custom roles that only
+    contain the necessary system and object privileges the user or role
+    needs to perform the task.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76143r2, SV-76145r1, SV-
+    76147r1, SV-76159r1
+
+* User Impersonation Privilege *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted user
+    impersonation privilege via 3 grants.  No grants to PUBLIC. No users
+    granted EXECUTE on restricted packages that can be executed with the
+    identity of some other user No grants to PUBLIC.
+Details:
+    Grants of BECOME USER:
+
+    SYSTEM <- DBA: BECOME USER
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE:
+        BECOME USER
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: BECOME USER
+
+Remarks:
+    The BECOME USER privilege and some PL/SQL packages (DBMS_AQADM_SYS,
+    DBMS_AQADM_SYSCALLS, DBMS_IJOB, DBMS_PRVTAQIM, DBMS_REPCAT_SQL_UTL,
+    DBMS_SCHEDULER, DBMS_STREAMS_ADM_UTL, DBMS_STREAMS_RPC, DBMS_SYS_SQL,
+    INITJVMAUX, LTADM, WWV_DBMS_SQL, WWV_EXECUTE_IMMEDIATE) allow for
+    execution of SQL code or external jobs using the identity of a
+    different user. Access should be strictly limited and granted only to
+    users with a legitimate need for this functionality. Use Privilege
+    Analysis to identify used and unused access to these privileges. Users
+    with BECOME USER privilege and EXECUTE privilege on above packages
+    should be sufficiently audited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.1.10, 4.2.1,
+    4.2.3 - 4.2.13, 4.3.5
+
+* Data Exfiltration *
+Status: Pass
+Summary:
+    No users granted EXECUTE on restricted packages that can be used for
+    data exfiltration.  No grants to PUBLIC.
+Remarks:
+    Some PL/SQL packages (DBMS_BACKUP_RESTORE, UTL_DBWS, UTL_ORAMTS) can
+    send data from the database using the network or file system. Access
+    should be granted only to users with a legitimate need for this
+    functionality. Use Privilege Analysis to identify if these privileges
+    were used. If not, consider revoking.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.1.19,
+    4.1.20, 4.2.2
+
+* System Privileges Granted to PUBLIC *
+Status: Pass
+Summary:
+    No grants to PUBLIC.
+Remarks:
+    Privileges granted to PUBLIC are available to all users. This generally
+    should include few, if any, system privileges since these will not be
+    needed by ordinary users who are not administrators.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75925r1
+
+* Roles Granted to PUBLIC *
+Status: Pass
+Summary:
+    PUBLIC has not been granted any role.
+Remarks:
+    Roles granted to PUBLIC are available to all users. Most roles contain
+    privileges that are not appropriate for all users. Use Privilege
+    Analysis to identify if these privileges were used. If not, work with
+    Oracle support and/or application provider to revoke them if possible.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75933r1
+
+* Column Privileges Granted to PUBLIC *
+Status: Pass
+Summary:
+    No grants to PUBLIC.
+Remarks:
+    Privileges granted to PUBLIC are available to all users. This should
+    include column privileges only for data that is intended to be
+    accessible to everyone.
+
+* Users with Administrative SYS* Privileges *
+Status: Low Risk
+Summary:
+    Found 2 users granted administrative SYS* privileges. Found 3
+    administrative SYS* privileges not granted to any user.
+Details:
+    SYSDBA    (1): SYS
+    SYSOPER   (2): C##REMOTE_USER, SYS
+    SYSBACKUP (0): (none)
+    SYSDG     (0): (none)
+    SYSKM     (0): (none)
+Remarks:
+    Administrative SYS* privileges allow a user to perform maintenance
+    operations, including some that may occur while the database is not
+    open. The SYSDBA privilege allows the user to run as SYS and perform
+    virtually all privileged operations. Starting with Oracle Database
+    12.1, less powerful administrative privileges were introduced to allow
+    users to perform specific  administrative tasks with less than full
+    SYSDBA privileges. To achieve the benefit of this separation of duty,
+    each of these administrative privileges should be granted to at least
+    one named user account.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76081r3
+
+* Users with DBA Role *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted highly
+    sensitive DBA role via 1 grant.
+Details:
+    Grants of DBA role:
+
+    SYSTEM: DBA
+
+Remarks:
+    The DBA is a powerful role and can be used to bypass many security
+    controls. It should be granted to a small number of trusted
+    administrators.
+    As a best practice, it is recommended to create custom DBA-like roles
+    with minimum set of privileges that users require to execute their
+    tasks (least privilege principle) and do not grant the DBA role.
+    Privilege Analysis can assist in the task of identifying used/unused
+    privileges and roles.
+    Having different roles with minimum required privileges based on types
+    of operations DBAs execute also helps to achieve Separation of Duties.
+    Furthermore, each trusted user should have an individual account for
+    accountability reasons. It is recommended to audit users with the DBA
+    roles to detect any unauthorized activity. Avoid granting the DBA or
+    custom DBA-like powerful roles WITH ADMIN option unless absolutely
+    necessary.
+    Please note that Oracle may add or remove roles and privileges from the
+    DBA role.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.4.4
+
+* Users with Powerful Roles *
+Status: Evaluate
+Summary:
+    1 out of 4 users have been directly or indirectly granted powerful
+    roles via 21 grants.  1 user is granted powerful roles with admin
+    option via 1 grant.
+Details:
+    Grants of AQ_ADMINISTRATOR_ROLE, EM_EXPRESS_ALL, EXP_FULL_DATABASE,
+        IMP_FULL_DATABASE, SELECT_CATALOG_ROLE, EXECUTE_CATALOG_ROLE,
+        DELETE_CATALOG_ROLE, OEM_MONITOR, DBA roles:
+
+    SYSTEM: AQ_ADMINISTRATOR_ROLE(*), DBA
+    SYSTEM <- DBA: EM_EXPRESS_ALL, EXECUTE_CATALOG_ROLE, EXP_FULL_DATABASE,
+        IMP_FULL_DATABASE, SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE: EXP_FULL_DATABASE
+    SYSTEM <- DBA <- DATAPUMP_EXP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        EXECUTE_CATALOG_ROLE, SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE: EXP_FULL_DATABASE,
+        IMP_FULL_DATABASE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- EXP_FULL_DATABASE:
+        EXECUTE_CATALOG_ROLE, SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- DATAPUMP_IMP_FULL_DATABASE <- IMP_FULL_DATABASE:
+        EXECUTE_CATALOG_ROLE, SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- EM_EXPRESS_ALL <- EM_EXPRESS_BASIC:
+        SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- EXP_FULL_DATABASE: EXECUTE_CATALOG_ROLE,
+        SELECT_CATALOG_ROLE
+    SYSTEM <- DBA <- IMP_FULL_DATABASE: EXECUTE_CATALOG_ROLE,
+        SELECT_CATALOG_ROLE
+
+    (*) = granted with admin option
+Remarks:
+    DBA and other similarly powerful roles (AQ_ADMINISTRATOR_ROLE,
+    EM_EXPRESS_ALL, EXP_FULL_DATABASE, IMP_FULL_DATABASE,
+    SELECT_CATALOG_ROLE, EXECUTE_CATALOG_ROLE, DELETE_CATALOG_ROLE,
+    OEM_MONITOR, DBA) contain powerful privileges that can be used to
+    bypass security protections. They should be granted only to a small
+    number of trusted administrators. It is recommended to audit users with
+    these roles to detect any unauthorized activity. Use Privilege Analysis
+    to identify if these privileges were used. If not, consider revoking.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 4.4.1, 4.4.2,
+    4.4.3
+    Oracle Database 12c STIG  v1 r10: Rule SV-75927r3
+
+* Java Permissions *
+Status: Evaluate
+Summary:
+    Found 5 users or roles with Java permission.
+Details:
+    Grantee: DBJAVASCRIPT
+    GRANT, Name: oracle.DbmsJavaScriptUser, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+
+    Grantee: EJBCLIENT
+    GRANT, Name: *, Type Schema: SYS, Type Name: java.net.SocketPermission,
+        Action: connect,resolve
+    GRANT, Name: createClassLoader, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: getClassLoader, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+
+    Grantee: JMXSERVER
+    GRANT, Name: javax.net.ssl.*, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: javavm/lib/management/*, Type Schema: SYS, Type Name:
+        java.io.FilePermission, Action: read
+    GRANT, Name: *, Type Schema: SYS, Type Name: java.net.SocketPermission,
+        Action: accept,connect,listen,resolve
+    GRANT, Name: control, Type Schema: SYS, Type Name:
+        java.util.logging.LoggingPermission
+    GRANT, Name: accessClassInPackage.sun.management.*, Type Schema: SYS,
+        Type Name: java.lang.RuntimePermission
+    GRANT, Name: setContextClassLoader, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: createMBeanServer, Type Schema: SYS, Type Name:
+        javax.management.MBeanServerPermission
+    GRANT, Name: control, Type Schema: SYS, Type Name:
+        java.lang.management.ManagementPermission
+    GRANT, Name: createAccessControlContext, Type Schema: SYS, Type Name:
+        java.security.SecurityPermission
+    GRANT, Name: javavm/lib/management/management.properties, Type Schema:
+        SYS, Type Name: java.io.FilePermission, Action: read
+    GRANT, Name: javavm/lib/management/jmxremote.access, Type Schema: SYS,
+        Type Name: java.io.FilePermission, Action: read
+    GRANT, Name: https.proxyHost, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: javax.net.debug, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: java.rmi.server.randomIDs, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: com.sun.jmx.*, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: com.sun.management.*, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read,write
+    GRANT, Name: *, Type Schema: SYS, Type Name:
+        javax.management.MBeanPermission, Action: *
+    GRANT, Name: monitor, Type Schema: SYS, Type Name:
+        java.lang.management.ManagementPermission
+
+    Grantee: PUBLIC
+    GRANT, Name: DUMMY, Type Schema: SYS, Type Name:
+        oracle.aurora.security.JServerPermission
+    GRANT, Name: LoadClassInPackage.*, Type Schema: SYS, Type Name:
+        oracle.aurora.security.JServerPermission
+    GRANT, Name: oracle.net.tns_admin, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: write
+    GRANT, Name: getenv.ORACLE_HOME, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: getenv.TNS_ADMIN, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: preferences, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: modifyThreadGroup, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: modifyThread, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: createSecurityManager, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: exitVM, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    GRANT, Name: *, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: read
+    GRANT, Name: user.language, Type Schema: SYS, Type Name:
+        java.util.PropertyPermission, Action: write
+    GRANT, Name: accessClassInPackage.com.sun.media.imageioimpl.stream,
+        Type Schema: SYS, Type Name: java.lang.RuntimePermission
+    GRANT, Name: accessClassInPackage.com.sun.media.imageioimpl.plugins.*,
+        Type Schema: SYS, Type Name: java.lang.RuntimePermission
+    RESTRICT, Name: LoadClassInPackage.oracle.jdbc.*, Type Schema: SYS,
+        Type Name: oracle.aurora.security.JServerPermission
+    RESTRICT, Name: LoadClassInPackage.oracle.aurora.*, Type Schema: SYS,
+        Type Name: oracle.aurora.security.JServerPermission
+    RESTRICT, Name: LoadClassInPackage.oracle.ord.*, Type Schema: SYS, Type
+        Name: oracle.aurora.security.JServerPermission
+    RESTRICT, Name: LoadClassInPackage.java.*, Type Schema: SYS, Type Name:
+        oracle.aurora.security.JServerPermission
+    RESTRICT, Name: loadLibrary.*, Type Schema: SYS, Type Name:
+        java.lang.RuntimePermission
+    RESTRICT, Name: 0:java.lang.RuntimePermission#loadLibrary.*, Type
+        Schema: SYS, Type Name:
+        oracle.aurora.rdbms.security.PolicyTablePermission
+
+    Grantee: SYSTEM
+    GRANT, Name: <<ALL FILES>>, Type Schema: SYS, Type Name:
+        java.io.FilePermission, Action: read
+Remarks:
+    Java permission grants control the ability of database users to execute
+    Java classes within the database server. A database user executing Java
+    code must have both Java security permissions and database privileges
+    to access resources within the database. These resources include
+    database resources, such as tables and PL/SQL packages, operating
+    system resources, such as files and sockets, Oracle JVM classes, and
+    user-loaded classes. Make sure that these permissions are limited to
+    the minimum required by each user. Use Privilege Analysis to identify
+    if these privileges were used. If not, consider revoking.
+
+### Authorization Control ###
+
+* Database Vault *
+Status: Advisory
+Summary:
+    Database Vault is not enabled.
+Remarks:
+    Database Vault provides for configurable policies to control the
+    actions of database accounts with elevated privileges such as those
+    accounts used by administrative users, applications and utilities.
+    Attacks (originating from external as well as internal sources)
+    leverage privileged account credentials to access sensitive
+    information. Database Vault realms prevent unauthorized access to
+    sensitive data objects, even by user accounts with system privileges.
+    Database Vault Command rules limit the accidental or malicious
+    execution of SQL commands. You can use Database Vault to enforce
+    separation of duties to prevent a single all powerful user.  Also it
+    provides trusted paths to further restrict access to sensitive data
+    using system factors such as IP address, program name, time of day and
+    user name.
+     Database Vault operations control can be used to restrict common users
+    from accessing pluggable database (PDB) local data in autonomous,
+    regular Cloud, or on-premises environments.
+References:
+    EU GDPR 2016/679: Article 6, 25, 29, 32, 34, 89; Recital 28, 29, 78,
+    156
+    Oracle Database 12c STIG  v1 r10: Rule SV-76065r1
+
+* Privilege Analysis *
+Status: Advisory
+Summary:
+    No Privilege Analysis policies found.
+Details:
+    Users who can start the privilege analysis capture process: SYSTEM
+Remarks:
+    Privilege Analysis records the privileges used during a real or
+    simulated workload. After collecting data about the privileges that are
+    actually used, this information can be used to revoke privilege grants
+    that are no longer needed or to create roles with only the privileges
+    that are used by the user or role. This helps in implementing Least
+    Privileged Model and allows to minimize risk involved in using unused
+    or lesser used privileges granted to a user.
+
+### Fine-Grained Access Control ###
+
+* Data Redaction *
+Status: Advisory
+Summary:
+    No data is being dynamically redacted.
+Details:
+
+    Users not impacted by Data Redaction Policies: SYSTEM
+    Users who can create or manage Data Redaction Policies:  SYSTEM
+Remarks:
+    Data Redaction automatically masks sensitive data found in the results
+    of a database query. The data is masked immediately before it is
+    returned as part of the result set, so it does not interfere with any
+    conditions specified as part of the query. Access by users with the
+    EXEMPT REDACTION POLICY privilege will not be affected by the redaction
+    policy. Users who can execute the DBMS_REDACT package are able to
+    create and modify redaction policies. Also consider the use of Oracle
+    Data Masking and Subsetting to permanently mask sensitive data when
+    making copies for test or development use.
+References:
+    EU GDPR 2016/679: Article 6, 25, 32, 34, 89; Recital 28, 29, 78, 156
+
+* Virtual Private Database *
+Status: Advisory
+Summary:
+    No VPD policies found that automatically limit access to certain rows
+    and/or columns based upon the user or the database environment.
+Details:
+
+    Users not impacted by VPD Policies: (none)
+    Users who can create or manage VPD Policies: SYSTEM
+Remarks:
+    Virtual Private Database (VPD) allows for fine-grained control over
+    which rows and columns of a table are visible to a SQL statement.
+    Access control using VPD limits each database session to only the
+    specific data it should be able to access. Access by users with the
+    EXEMPT ACCESS POLICY privilege will not be affected by VPD policies.
+    Users who can execute the DBMS_RLS package are able to create and
+    modify these policies.
+References:
+    EU GDPR 2016/679: Article 29, 32
+
+* Real Application Security *
+Status: Advisory
+Summary:
+    No RAS policies found.
+Details:
+
+    Users not impacted by RAS Policies: (none)
+    Users who can create or manage RAS policies: DBSFWUSER, SYSTEM, SYSTEM
+Remarks:
+    Like Virtual Private Database, Real Application Security (RAS)
+    introduced in Oracle 12c Release 1, provides fine-grained control over
+    the rows and columns of a table that are visible to a SQL statement.
+    RAS data access policies uses a declarative syntax based on access
+    control lists. Access by users with the EXEMPT ACCESS POLICY privilege
+    will not be affected by RAS access policies. Users with
+    ADMIN_SEC_POLICY and APPLY_SEC_POLICY privileges are able to create and
+    modify these policies.
+References:
+    EU GDPR 2016/679: Article 6, 25, 32, 34, 89; Recital 28, 29, 64, 78,
+    156
+
+* Label Security *
+Status: Advisory
+Summary:
+    Label Security is not enabled.
+Remarks:
+    Oracle Label Security uses row level data classifications to enforce
+    access controls restricting users to only the data they are allowed to
+    access. Access to sensitive data is controlled by comparing the data
+    label with the requesting user's label or security clearance. A user
+    label or security clearance can be thought of as an extension to
+    standard database privileges and roles. Access by users with the EXEMPT
+    ACCESS POLICY privilege will not be affected by the Label Security
+    policies. Each policy has a corresponding role; users who have this
+    role are able to administer the policy.
+References:
+    EU GDPR 2016/679: Article 18, 29, 32; Recital 67
+
+* Transparent Sensitive Data Protection (TSDP) *
+Status: Advisory
+Summary:
+    No data tagged with sensitive types found.  Found 0 TSDP policy.
+Details:
+    Policies: (none)
+
+    Users with EXECUTE on SYS.DBMS_TSDP_MANAGE: (none)
+    Users with EXECUTE on SYS.DBMS_TSDP_PROTECT: (none)
+Remarks:
+    Transparent Sensitive Data Protection (TSDP), introduced in Oracle
+    Database 12c Release 1 Enterprise Edition, allows a data type(such as
+    Credit Card number) to be associated with each column that contains
+    sensitive data. TSDP can then apply various data security features such
+    as Data Redaction or Virtual Private Database to all instances of that
+    particular type so that protection is uniform and consistent. Data from
+    columns marked as sensitive is also automatically redacted in the
+    database audit trail and trace logs. Users who can execute the
+    DBMS_TSDP_MANAGE and DBMS_TSDP_PROTECT packages are able to manage
+    sensitive data types and the protection actions that are applied to
+    them.
+
+### Auditing ###
+
+* Audit Records *
+Status: Evaluate
+Summary:
+    Examined 3 audit trails. Found records in 1 audit trail. No errors
+    found in audit initialization parameters.
+Details:
+    Traditional Audit Trail: No records found
+    FGA Audit Trail: No records found
+    Unified Audit Trail: In use, 329 records found (Oct 18 2019 - Nov 24
+        2019)
+
+    AUDIT_FILE_DEST=/u01/app/oracle/admin/orcl/adump
+    AUDIT_SYSLOG_LEVEL is not set.
+    AUDIT_TRAIL=DB
+Remarks:
+    Auditing is an essential component for monitoring the activities on any
+    system including the activities of highly privileged users. Oracle
+    Database 12c introduced Unified Auditing that centralizes audit logs in
+    a single unified audit trail, and simplifies audit policy management,
+    and is the recommended auditing mode moving forward. The
+    AUDIT_FILE_DEST controls the OS directory to which the audit trail is
+    written if using AUDIT_TRAIL=os, xml, or xml,extended. This directory
+    should be prevented from any unauthorized access. Sending audit data to
+    a remote system is recommended in order to prevent any possible local
+    tampering with the audit records. The AUDIT_SYSLOG_LEVEL parameter can
+    be set to send an abbreviated version of audit records to a remote
+    syslog collector. A better solution is to use Oracle Audit Vault and
+    Database Firewall to centrally collect full audit records from multiple
+    databases.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.2
+    EU GDPR 2016/679: Article 30, 33, 34
+    Oracle Database 12c STIG  v1 r10: Rule SV-75899r1, SV-76111r1, SV-
+    76117r1, SV-76121r1, SV-76123r1, SV-76125r1, SV-76127r1, SV-76129r1,
+    SV-76455r3
+
+* Unified Audit Policies *
+Status: Evaluate
+Summary:
+    Found 9 unified audit policies out of which 2 are enabled. 50 objects
+    or statements being audited.
+Details:
+    Enabled Policies:
+
+    ORA_LOGON_FAILURES: Audits 1 privileges/objects/statements as follows:
+        LOGON
+
+    ORA_SECURECONFIG: Audits 49 privileges/objects/statements as follows:
+        ADMINISTER KEY MANAGEMENT, ALTER ANY PROCEDURE, ALTER ANY SQL
+        TRANSLATION PROFILE, ALTER ANY TABLE, ALTER DATABASE, ALTER
+        DATABASE DICTIONARY, ALTER DATABASE LINK, ALTER PLUGGABLE DATABASE,
+        ALTER PROFILE, ALTER ROLE, ALTER SYSTEM, ALTER USER, AUDIT SYSTEM,
+        BECOME USER, CREATE ANY JOB, CREATE ANY LIBRARY, CREATE ANY
+        PROCEDURE, CREATE ANY SQL TRANSLATION PROFILE, CREATE ANY TABLE,
+        CREATE DATABASE LINK, CREATE DIRECTORY, CREATE EXTERNAL JOB, CREATE
+        PLUGGABLE DATABASE, CREATE PROFILE, CREATE PUBLIC SYNONYM, CREATE
+        ROLE, CREATE SQL TRANSLATION PROFILE, CREATE USER, DROP ANY
+        PROCEDURE, DROP ANY SQL TRANSLATION PROFILE, DROP ANY TABLE, DROP
+        DATABASE LINK, DROP DIRECTORY, DROP PLUGGABLE DATABASE, DROP
+        PROFILE, DROP PUBLIC SYNONYM, DROP ROLE, DROP USER, EXECUTE,
+        EXECUTE, EXEMPT ACCESS POLICY, EXEMPT REDACTION POLICY, GRANT ANY
+        OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE, LOGMINING,
+        PURGE DBA_RECYCLEBIN, SET ROLE, TRANSLATE ANY SQL, EXECUTE ON
+        REMOTE_SCHEDULER_AGENT.ADD_AGENT_CERTIFICATE, EXECUTE ON
+        SYS.DBMS_RLS
+
+
+    Disabled Policies:
+
+    ORA_ACCOUNT_MGMT: Audits 9 privileges/objects/statements
+    ORA_CIS_RECOMMENDATIONS: Audits 35 privileges/objects/statements
+    ORA_DATABASE_PARAMETER: Audits 3 privileges/objects/statements
+    ORA_DV_AUDPOL: Audits 2180 privileges/objects/statements
+    ORA_DV_AUDPOL2: Audits 19 privileges/objects/statements
+    ORA_RAS_POLICY_MGMT: Audits 35 privileges/objects/statements
+    ORA_RAS_SESSION_MGMT: Audits 14 privileges/objects/statements
+Remarks:
+    Unified Audit, introduced in Oracle Database 12c, captures audit
+    activity in one single unified audit trail. It also introduces new
+    syntax for specifying effective audit policies including the ability to
+    build conditions and add exclusions.
+References:
+    EU GDPR 2016/679: Article 30, 33, 34
+    Oracle Database 12c STIG  v1 r10: Rule SV-76361r1
+
+* Audit User Logon / Logoff *
+Status: Medium Risk
+Summary:
+    Database connections are not fully audited.
+Details:
+    Auditing not enabled: LOGOFF
+
+    Traditional audit - disabled.
+    Unified audit - auditing enabled: LOGON
+Remarks:
+    Successful user connections to the database should be audited to assist
+    with forensic analysis. Unsuccessful connection attempts can provide
+    early warning of an attacker's attempt to gain access to the database.
+    Auditing the LOGOFF time helps understand how long the session was
+    active, and is useful information for forensics.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.22, 5.2.27
+    Oracle Database 12c STIG  v1 r10: Rule SV-76043r1, SV-76141r1, SV-
+    76165r1
+
+* Audit Administrative (SYS*) Users *
+Status: Pass
+Summary:
+    Actions of the SYS user are audited.
+Details:
+    Traditional Audit: AUDIT_SYS_OPERATIONS is set to TRUE.
+
+    Unified Audit policies enabled for administrators: (none)
+Remarks:
+    It is important to audit administrative actions performed by the SYS
+    user. Traditional audit policies do not apply to SYS, so the
+    AUDIT_SYS_OPERATIONS parameter must be set to record SYS actions to a
+    separate audit trail. Beginning with Oracle 12c, the same Unified Audit
+    policies can be applied to SYS that are used to monitor other users.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.1
+    Oracle Database 12c STIG  v1 r10: SV-75983r1, Rule SV-76009r1, SV-
+    76085r2
+
+* Database Management Audit *
+Status: Medium Risk
+Summary:
+    Actions related to database management are not fully audited.
+Details:
+    Auditing not enabled: ALTER FUNCTION, ALTER PACKAGE, ALTER PROCEDURE,
+        ALTER PUBLIC DATABASE LINK, ALTER TRIGGER, AUDIT ANY, CREATE ANY
+        DIRECTORY, CREATE FUNCTION, CREATE LIBRARY, CREATE PACKAGE, CREATE
+        PACKAGE BODY, CREATE PROCEDURE, CREATE PUBLIC DATABASE LINK, CREATE
+        SPFILE, CREATE TRIGGER, DROP ANY DIRECTORY, DROP FUNCTION, DROP
+        PACKAGE, DROP PROCEDURE, DROP PUBLIC DATABASE LINK, DROP TRIGGER,
+        SYSTEM AUDIT
+
+    Traditional audit - disabled.
+    Unified audit - auditing enabled: ADMINISTER KEY MANAGEMENT, ALTER
+        DATABASE, ALTER DATABASE LINK, ALTER PLUGGABLE DATABASE, ALTER
+        SYSTEM, CREATE ANY LIBRARY, CREATE DATABASE LINK, CREATE EXTERNAL
+        JOB, CREATE PLUGGABLE DATABASE, CREATE PUBLIC SYNONYM, DROP ANY
+        PROCEDURE, DROP DATABASE LINK, DROP PLUGGABLE DATABASE, DROP PUBLIC
+        SYNONYM, EXECUTE ON SYS.DBMS_RLS
+Remarks:
+    Actions that affect the management of database features should always
+    be audited. Each action or privilege listed here should be included in
+    at least one enabled audit policy.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.9, 5.1.10,
+    5.1.11, 5.1.17, 5.1.19 - 5.1.21, 5.2.12 - 5.2.14, 5.2.20 - 5.2.26
+    Oracle Database 12c STIG  v1 r10: Rule SV-83467r1
+
+* Account Management Audit *
+Status: Pass
+Summary:
+    Actions related to account management are fully audited.
+Details:
+    Traditional audit - disabled.
+    Unified audit - auditing enabled: ALTER PROFILE, ALTER USER, CREATE
+        PROFILE, CREATE USER, DROP PROFILE, DROP USER
+Remarks:
+    Creation of new user accounts or modification of existing accounts can
+    be used to gain access to the privileges of those accounts and should
+    be audited. Each action or privilege listed here should be included in
+    at least one enabled audit policy.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.1, 5.1.2,
+    5.1.3, 5.1.6, 5.1.7, 5.1.8, 5.2.1, 5.2.2, 5.2.3, 5.2.9, 5.2.10, 5.2.11
+    Oracle Database 12c STIG  v1 r10: Rule SV-76055r2, SV-76059r2, SV-
+    76061r4, SV-76063r2, SV-76141r1, SV-76287r2, SV-76289r2, SV-76291r2,
+    SV-76293r2
+
+* Privilege Audit *
+Status: Evaluate
+Summary:
+    Auditing enabled for 30 privileges.
+Details:
+    Unified Audit (30): ADMINISTER KEY MANAGEMENT, ALTER ANY PROCEDURE,
+        ALTER ANY SQL TRANSLATION PROFILE, ALTER ANY TABLE, ALTER DATABASE,
+        ALTER SYSTEM, AUDIT SYSTEM, BECOME USER, CREATE ANY JOB, CREATE ANY
+        LIBRARY, CREATE ANY PROCEDURE, CREATE ANY SQL TRANSLATION PROFILE,
+        CREATE ANY TABLE, CREATE EXTERNAL JOB, CREATE PUBLIC SYNONYM,
+        CREATE SQL TRANSLATION PROFILE, CREATE USER, DROP ANY PROCEDURE,
+        DROP ANY SQL TRANSLATION PROFILE, DROP ANY TABLE, DROP PUBLIC
+        SYNONYM, DROP USER, EXEMPT ACCESS POLICY, EXEMPT REDACTION POLICY,
+        GRANT ANY OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE,
+        LOGMINING, PURGE DBA_RECYCLEBIN, TRANSLATE ANY SQL
+Remarks:
+    This finding shows the privileges that are audited by enabled audit
+    policies. It is recommended that privileges such as GRANT ANY OBJECT
+    PRIVILEGE, GRANT ANY PRIVILEGE and DROP ANY PROCEDURE are audited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.15,
+    5.1.16, 5.1.17
+
+* Roles Audit *
+Status: Pass
+Summary:
+    No Audit Policy enabled on roles.
+Remarks:
+    When you audit a role, Oracle Database audits all system privileges
+    that are directly granted to the role. Users granted these roles will
+    be audited for the system privileges granted to the role.
+
+* Privilege Usage Audit *
+Status: Medium Risk
+Summary:
+    Usages of powerful system privileges are not fully audited.
+Remarks:
+    Usage of powerful system privileges should always be audited. Each
+    privilege listed here should be included in at least one enabled audit
+    policy.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.14, 5.2.18
+
+* Privilege Management Audit *
+Status: Pass
+Summary:
+    Privilege management actions are fully audited.
+Details:
+    Traditional audit - disabled.
+    Unified audit - auditing enabled: ALTER ROLE, CREATE ROLE, DROP ROLE,
+        GRANT ANY OBJECT PRIVILEGE, GRANT ANY PRIVILEGE, GRANT ANY ROLE
+Remarks:
+    Granting additional privileges to users or roles potentially affects
+    most security protection and should be audited. Each action or
+    privilege listed here should be included in at least one enabled audit
+    policy.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 5.1.4, 5.1.5,
+    5.1.15, 5.1.16, 5.2.4 - 5.2.8
+
+* Statement Audit *
+Status: Evaluate
+Summary:
+    Auditing enabled for 18 statements.
+Details:
+    Unified Audit (18): ALTER DATABASE DICTIONARY, ALTER DATABASE LINK,
+        ALTER PLUGGABLE DATABASE, ALTER PROFILE, ALTER ROLE, ALTER USER,
+        CREATE DATABASE LINK, CREATE DIRECTORY, CREATE PLUGGABLE DATABASE,
+        CREATE PROFILE, CREATE ROLE, DROP DATABASE LINK, DROP DIRECTORY,
+        DROP PLUGGABLE DATABASE, DROP PROFILE, DROP ROLE, LOGON, SET ROLE
+Remarks:
+    This finding shows the SQL statements that are audited by enabled audit
+    policies. It is recommended that SQL statements like GRANT DIRECTORY
+    and LOCK TABLE are audited.
+
+* Object Audit *
+Status: Evaluate
+Summary:
+    Auditing enabled for 216 objects.
+Details:
+    Traditional Audit:
+    Schema DVF (1): DBMS_MACSEC_FUNCTION
+    Schema DVSYS (91): AUDIT_TRAIL$, AUDIT_TRAIL$_SEQ, CODE$, CODE$_SEQ,
+        COMMAND_RULE$, COMMAND_RULE$_SEQ, DBA_DV_CODE, DBA_DV_COMMAND_RULE,
+        DBA_DV_FACTOR, DBA_DV_FACTOR_LINK, DBA_DV_FACTOR_TYPE,
+        DBA_DV_IDENTITY, DBA_DV_IDENTITY_MAP, DBA_DV_MAC_POLICY,
+        DBA_DV_MAC_POLICY_FACTOR, DBA_DV_POLICY_LABEL, DBA_DV_REALM,
+        DBA_DV_REALM_AUTH, DBA_DV_REALM_OBJECT, DBA_DV_ROLE, DBA_DV_RULE,
+        DBA_DV_RULE_SET, DBA_DV_RULE_SET_RULE, DBMS_MACADM, DBMS_MACAUD,
+        DBMS_MACOLS, DBMS_MACOLS_SESSION, DBMS_MACSEC, DBMS_MACSEC_ROLES,
+        DBMS_MACSEC_RULES, DBMS_MACUTL, DV$CODE, DV$COMMAND_RULE,
+        DV$FACTOR, DV$FACTOR_LINK, DV$FACTOR_TYPE, DV$IDENTITY,
+        DV$IDENTITY_MAP, DV$MAC_POLICY, DV$MAC_POLICY_FACTOR,
+        DV$OLS_POLICY, DV$OLS_POLICY_LABEL, DV$POLICY_LABEL, DV$REALM,
+        DV$REALM_AUTH, DV$REALM_OBJECT, DV$ROLE, DV$RULE, DV$RULE_SET,
+        DV$RULE_SET_RULE, DV$SYS_GRANTEE, DV$SYS_OBJECT,
+        DV$SYS_OBJECT_OWNER, EVALUATE_RULE_SET, FACTOR$, FACTOR$_SEQ,
+        FACTOR_LINK$, FACTOR_LINK$_SEQ, FACTOR_TYPE$, FACTOR_TYPE$_SEQ,
+        GET_FACTOR, GET_TRUST_LEVEL, GET_TRUST_LEVEL_FOR_IDENTITY,
+        IDENTITY$, IDENTITY$_SEQ, IDENTITY_MAP$, IDENTITY_MAP$_SEQ,
+        MACOLS_INIT_SESSION, MAC_POLICY$, MAC_POLICY$_SEQ,
+        MAC_POLICY_FACTOR$, MAC_POLICY_FACTOR$_SEQ, POLICY_LABEL$,
+        POLICY_LABEL$_SEQ, PREDICATE_TRUE, REALM$, REALM$_SEQ, REALM_AUTH$,
+        REALM_AUTH$_SEQ, REALM_OBJECT$, REALM_OBJECT$_SEQ, ROLE$,
+        ROLE$_SEQ, ROLE_IS_ENABLED, RULE$, RULE$_SEQ, RULE_SET$,
+        RULE_SET$_SEQ, RULE_SET_RULE$, RULE_SET_RULE$_SEQ, SET_FACTOR
+    Schema LBACSYS (122): ALL_SA_AUDIT_OPTIONS, ALL_SA_COMPARTMENTS,
+        ALL_SA_DATA_LABELS, ALL_SA_GROUPS, ALL_SA_GROUP_HIERARCHY,
+        ALL_SA_LABELS, ALL_SA_LEVELS, ALL_SA_POLICIES, ALL_SA_PROGRAMS,
+        ALL_SA_PROG_PRIVS, ALL_SA_SCHEMA_POLICIES, ALL_SA_TABLE_POLICIES,
+        ALL_SA_USERS, ALL_SA_USER_COMPARTMENTS, ALL_SA_USER_GROUPS,
+        ALL_SA_USER_LABELS, ALL_SA_USER_LEVELS, ALL_SA_USER_PRIVS,
+        DBA_LBAC_DATA_LABELS, DBA_LBAC_LABELS, DBA_LBAC_LABEL_TAGS,
+        DBA_LBAC_POLICIES, DBA_LBAC_SCHEMA_POLICIES,
+        DBA_LBAC_TABLE_POLICIES, DBA_OLS_AUDIT_OPTIONS,
+        DBA_SA_AUDIT_OPTIONS, DBA_SA_COMPARTMENTS, DBA_SA_DATA_LABELS,
+        DBA_SA_GROUPS, DBA_SA_GROUP_HIERARCHY, DBA_SA_LABELS,
+        DBA_SA_LEVELS, DBA_SA_POLICIES, DBA_SA_PROGRAMS, DBA_SA_PROG_PRIVS,
+        DBA_SA_SCHEMA_POLICIES, DBA_SA_TABLE_POLICIES, DBA_SA_USERS,
+        DBA_SA_USER_COMPARTMENTS, DBA_SA_USER_GROUPS, DBA_SA_USER_LABELS,
+        DBA_SA_USER_LEVELS, DBA_SA_USER_PRIVS, LBAC$CACHE_LIBT,
+        LBAC$EVENT_LIBT, LBAC$LABEL_LIBT, LBAC$LABLT_LIBT, LBAC$PRIVS_LIBT,
+        LBAC$SA, LBAC$SA_LABELS, LBAC$STD_LIBT, LBAC$TYPE_LIBT,
+        LBAC$USER_LIBT, LBAC_BIN_LABEL, LBAC_CACHE, LBAC_ERRORS,
+        LBAC_EVENTS, LBAC_FRAME_GRANT, LBAC_LABEL, LBAC_LABEL_LIST,
+        LBAC_NAME_LIST, LBAC_POLICY_ADMIN, LBAC_PRIVS, LBAC_RLS,
+        LBAC_SERVICES, LBAC_SESSION, LBAC_STANDARD, LBAC_SYSDBA, LBAC_UTL,
+        LDAP_ATTR, LDAP_ATTR_LIST, LDAP_EVENT, LDAP_EVENT_STATUS,
+        NUMERIC_DOMINATED_BY, NUMERIC_DOMINATES, NUMERIC_GREATEST_LBOUND,
+        NUMERIC_LABEL_TO_CHAR, NUMERIC_LEAST_UBOUND, NUMERIC_MERGE_LABEL,
+        NUMERIC_STRICTLY_DOMINATED_BY, NUMERIC_STRICTLY_DOMINATES,
+        OLS$AUDIT, OLS$AUDIT_ACTIONS, OLS$COMPARTMENTS, OLS$DIP_DEBUG,
+        OLS$DIP_EVENTS, OLS$GROUPS, OLS$INSTALLATIONS, OLS$LAB,
+        OLS$LAB_SEQUENCE, OLS$LEVELS, OLS$POL, OLS$POLICY_ADMIN,
+        OLS$POLICY_COLUMNS, OLS$POLS, OLS$POLT, OLS$PROFILES, OLS$PROG,
+        OLS$PROPS, OLS$TAG_SEQUENCE, OLS$TRUSTED_PROGS, OLS$USER,
+        OLS$USER_COMPARTMENTS, OLS$USER_GROUPS, OLS$USER_LEVELS,
+        OLS_DIP_NTFY, PRIVS_TO_CHAR, SA$ADMIN, SA$POL, SA_AUDIT_ADMIN,
+        SA_COMPONENTS, SA_LABEL_ADMIN, SA_POLICY_GRANT, SA_SESSION,
+        SA_SYSDBA, SA_USER_ADMIN, SA_UTL, TO_LBAC_DATA_LABEL,
+        TO_LBAC_LABEL, TO_NUMERIC_DATA_LABEL, TO_NUMERIC_LABEL,
+        USER_SA_SESSION
+
+    Unified Audit:
+    Schema REMOTE_SCHEDULER_AGENT (1): ADD_AGENT_CERTIFICATE
+    Schema SYS (1): DBMS_RLS
+Remarks:
+    This finding shows the object accesses that are audited by enabled
+    audit policies.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76141r1
+
+* Fine Grained Audit *
+Status: Advisory
+Summary:
+    No fine grained audit policies found.
+Details:
+
+    Users with EXECUTE on SYS.DBMS_FGA: SYSTEM
+Remarks:
+    Fine Grained Audit policies can record specific activity, such as
+    access to particular table with sensitive columns or access that occurs
+    under specified conditions. This is an effective useful way to monitor
+    unexpected data access while avoiding unnecessary audit records that
+    correspond to normal activity.
+
+### Encryption ###
+
+* Transparent Data Encryption *
+Status: Advisory
+Summary:
+    Found 7 unencrypted tablespaces. No encrypted columns found. Examined 1
+    initialization parameter.
+Details:
+    Unencrypted tablespaces: SYSAUX, SYSTEM, TEMP, TS1, TS2, UNDOTBS1,
+        USERS
+    Encrypted tablespaces: (none)
+
+    ENCRYPT_NEW_TABLESPACES=CLOUD_ONLY. Recommended value is ALWAYS in the
+        Oracle Cloud or in an on-premise database.
+Remarks:
+    Encryption of sensitive data is a requirement in most regulated
+    environments. Transparent Data Encryption automatically encrypts data
+    as it is stored and decrypts it upon retrieval. This protects sensitive
+    data from attacks that bypass the database and read data files
+    directly. Encryption keys may be stored in wallets on the database
+    server itself, or stored remotely in Oracle Key Vault for improved
+    security. The ENCRYPT_NEW_TABLESPACES parameter ensures that TDE
+    tablespace encryption is applied to all newly created tablespaces.
+    Setting this parameter to ALWAYS is recommended in order to protect all
+    data regardless of the options specified when the tablespace is
+    created.
+References:
+    EU GDPR 2016/679: Article 6, 32, 34; Recital 83
+    Oracle Database 12c STIG  v1 r10: Rule SV-76157r2, SV-76245r2, SV-
+    76251r1, SV-76261r2, SV-76263r3
+
+* Encryption Key Wallet *
+Status: Evaluate
+Summary:
+    Found 3 wallets. No wallets are stored in the data file directory.
+Details:
+    Encryption wallet location: /u01/app/oracle/admin/orcl2/tde_wallet/
+    Wallet type: FILE
+    Status: CLOSED
+    Keystore type: UNKNOWN
+    Wallet order: SINGLE
+
+    Encryption wallet location:
+    Wallet type: FILE
+    Status: CLOSED
+    Keystore type: UNKNOWN
+    Wallet order: SINGLE
+
+    Encryption wallet location:
+    Wallet type: FILE
+    Status: CLOSED
+    Keystore type: UNKNOWN
+    Wallet order: SINGLE
+
+    Data file directory: +DATA/dbs
+Remarks:
+    Wallets are encrypted files used to store encryption keys, passwords,
+    and other sensitive data. Wallet files should not be stored in the same
+    directory with database data files, to avoid accidentally creating
+    backups that include both encrypted data files and the wallet
+    containing the master key protecting those files. For maximum
+    separation of keys and data, consider storing encryption keys in Oracle
+    Key Vault instead of wallet files.
+References:
+    EU GDPR 2016/679: Article 6, 32, 34; Recital 83
+    Oracle Database 12c STIG  v1 r10: Rule SV-76015r1, SV-76223r2, SV-
+    76233r2
+
+### Database Configuration ###
+
+* Initialization Parameters for Security *
+Name                              Value                           
+--------------------------------- --------------------------------
+ADG_ACCOUNT_INFO_TRACKING         LOCAL                           
+AUDIT_FILE_DEST                   /u01/app/oracle/admin/orcl/adump
+AUDIT_SYSLOG_LEVEL                                                
+AUDIT_SYS_OPERATIONS              TRUE                            
+AUDIT_TRAIL                       DB                              
+COMPATIBLE                        19.0.0                          
+CURSOR_BIND_CAPTURE_DESTINATION   memory+disk                     
+DBFIPS_140                        FALSE                           
+DISPATCHERS                       (PROTOCOL=TCP) (SERVICE=orclXDB)
+ENCRYPT_NEW_TABLESPACES           CLOUD_ONLY                      
+GLOBAL_NAMES                      FALSE                           
+LDAP_DIRECTORY_ACCESS             NONE                            
+LDAP_DIRECTORY_SYSAUTH            no                              
+OS_AUTHENT_PREFIX                 ops$                            
+OS_ROLES                          FALSE                           
+OUTBOUND_DBLINK_PROTOCOLS         ALL                             
+PDB_LOCKDOWN                                                      
+PDB_OS_CREDENTIAL                                                 
+REMOTE_DEPENDENCIES_MODE          TIMESTAMP                       
+REMOTE_LISTENER                                                   
+REMOTE_LOGIN_PASSWORDFILE         EXCLUSIVE                       
+REMOTE_OS_AUTHENT                 FALSE                           
+REMOTE_OS_ROLES                   FALSE                           
+RESOURCE_LIMIT                    TRUE                            
+SEC_CASE_SENSITIVE_LOGON          TRUE                            
+SEC_MAX_FAILED_LOGIN_ATTEMPTS     3                               
+SEC_PROTOCOL_ERROR_FURTHER_ACTION (DROP,3)                        
+SEC_PROTOCOL_ERROR_TRACE_ACTION   TRACE                           
+SEC_RETURN_SERVER_RELEASE_BANNER  FALSE                           
+SQL92_SECURITY                    TRUE                            
+UNIFIED_AUDIT_SGA_QUEUE_SIZE      1048576                         
+UNIFIED_AUDIT_SYSTEMLOG                                           
+
+* Access to Dictionary Objects *
+Status: Pass
+Summary:
+    Access to dictionary objects is properly limited.
+Remarks:
+    When O7_DICTIONARY_ACCESSIBILITY is set to FALSE, tables owned by SYS
+    are not accessible through the ANY TABLE system privileges. This
+    parameter should always be set to FALSE because tables owned by SYS
+    control the overall state of the database and should not be subject to
+    manipulation by users with ANY TABLE privileges.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.5
+    Oracle Database 12c STIG  v1 r10: Rule SV-76079r2
+
+* Inference of Table Data *
+Status: Pass
+Summary:
+    Data inference attacks are properly blocked.
+Details:
+    SQL92_SECURITY=TRUE
+Remarks:
+    When SQL92_SECURITY is set to TRUE, UPDATE and DELETE statements that
+    refer to a column in their WHERE clauses will succeed only when the
+    user has the privilege to SELECT from the same column. This parameter
+    should be set to TRUE so that this requirement is enforced in order to
+    prevent users from inferring the value of a column which they do not
+    have the privilege to view.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.17
+    Oracle Database 12c STIG  v1 r10: Rule SV-75919r1
+
+* Access to Password File *
+Status: Pass
+Summary:
+    The password file is configured correctly.
+Details:
+    REMOTE_LOGIN_PASSWORDFILE=EXCLUSIVE
+Remarks:
+    The REMOTE_LOGIN_PASSWORDFILE set to EXCLUSIVE allows the password file
+    to contain distinct entries for each administrative user allowing them
+    to be individually audited and tracked for their actions. It also
+    allows passwords to be updated using the ALTER USER command.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75921r2
+
+* Network Communication *
+Status: Pass
+Summary:
+    Examined 4 initialization parameters. No issues found.
+Details:
+    REMOTE_LISTENER=''
+    SEC_PROTOCOL_ERROR_FURTHER_ACTION=(DROP,3)
+    SEC_PROTOCOL_ERROR_TRACE_ACTION=TRACE
+    SEC_RETURN_SERVER_RELEASE_BANNER=FALSE
+Remarks:
+    REMOTE_LISTENER allows a network listener running on another system to
+    be used. This parameter should normally be unset to ensure that the
+    local listener is used. The SEC_PROTOCOL_ERROR parameters control the
+    database server's response when it receives malformed network packets
+    from a client. Because these malformed packets may indicate an
+    attempted attack by a malicious client, the parameters should be set to
+    log the incident and terminate the connection.
+    SEC_RETURN_SERVER_RELEASE_BANNER should be set to FALSE to limit the
+    information that is returned to an unauthenticated client, which could
+    be used to help determine the server's version number and thus the
+    vulnerabilities.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.7, 2.2.14,
+    2.2.15, 2.2.16
+    Oracle Database 12c STIG  v1 r10: Rule SV-76305r4
+
+* External OS Authorization *
+Status: Pass
+Summary:
+    Examined 3 initialization parameters. No issues found.
+Details:
+    REMOTE_OS_AUTHENT=FALSE
+    REMOTE_OS_ROLES=FALSE
+    OS_ROLES=FALSE
+Remarks:
+    The OS_ROLES parameter determines whether roles granted to users are
+    controlled by GRANT statements in the database or by the database
+    server's operating system. REMOTE_OS_AUTHENT and REMOTE_OS_ROLES allow
+    the client operating system to set the database user and roles. All of
+    these parameters should be set to FALSE so that the authorizations of
+    database users are managed by the database itself.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.6, 2.2.9,
+    2.2.10
+    Oracle Database 12c STIG  v1 r10: Rule SV-75915r1, SV-75917r1
+
+* Trace Files *
+Status: Pass
+Summary:
+    Examined 0 initialization parameter. No issues found.
+Remarks:
+    The hidden parameter _TRACE_FILES_PUBLIC determines whether trace files
+    generated by the database should be accessible to all OS users. Since
+    these files may contain sensitive information, access should be limited
+    by setting this parameter to FALSE.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.18
+    Oracle Database 12c STIG  v1 r10: Rule: SV-75955r1
+
+* Instance Name Check *
+Status: Pass
+Summary:
+    Instance name does not contain database version number.
+Details:
+    Instance Name = orcl
+    Database Version = 19.5.0.0.0
+Remarks:
+    Instance names should not contain Oracle version numbers. Service names
+    may be discovered by unauthenticated users. If the service name
+    includes version numbers or other database product information, a
+    malicious user may use that information to develop a targeted attack.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75903r1
+
+* Triggers *
+Status: Pass
+Summary:
+    Found 1 logon trigger. No disabled triggers found.
+Details:
+    Logon triggers: SYS.DBMS_SET_PDB(ENABLED)
+Remarks:
+    A trigger is code that executes whenever a specific event occurs, such
+    as inserting data in a table or connecting to the database. Disabled
+    Oracle provided triggers could be a potential cause for concern because
+    whatever protection or monitoring they may be expected to provide is
+    disabled.
+
+* Disabled Constraints *
+Status: Low Risk
+Summary:
+    Found 1 disabled constraint.
+Details:
+    Disabled constraints: STS_CHUNKS on GSMADMIN_INTERNAL.SHARD_TS
+Remarks:
+    Constraints are used to enforce and guarantee specific relationships
+    between data items stored in the database. Disabled constraints are a
+    potential cause for concern because the conditions they ensure are not
+    enforced.
+
+* External Procedures *
+Status: Evaluate
+Summary:
+    Found 5 external procedures. No external services found.
+Details:
+    External procedures: MDSYS.SDO_GEOR_GDAL_LIB, ORDSYS.ORDIMLIBS,
+        SYS.DBMSHADOOPLIB, SYS.DM$RQEXTLIB, SYS.KUBSAGT_LIB
+
+Remarks:
+    External procedures allow code written in other languages to be
+    executed from PL/SQL. Note that modifications to external code cannot
+    be controlled by the database. Be careful to ensure that only trusted
+    code libraries are available to be executed. Although the database can
+    spawn its own process to execute the external procedure, it is
+    advisable to configure a listener service for this purpose so that the
+    external code can run as a less-privileged OS user. The listener
+    configuration should set EXTPROC_DLLS to identify the specific shared
+    library code that can be executed rather than using the default value
+    ANY.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.1.2
+    Oracle Database 12c STIG  v1 r10: Rule SV-76091r2, SV-76173r1, SV-
+    76175r2
+
+* Directory Objects *
+Status: Medium Risk
+Summary:
+    Found 15 directory objects. Found 1 directory object allowing access to
+    restricted Oracle directory paths. No directory objects allow both
+    write and execute access.
+Details:
+    Directory Name: DATA_PUMP_DIR
+    Path = /u01/app/oracle/admin/orcl/dpdump/
+    Users or roles with access: EXP_FULL_DATABASE(READ),
+        EXP_FULL_DATABASE(WRITE), IMP_FULL_DATABASE(READ),
+        IMP_FULL_DATABASE(WRITE)
+
+    Directory Name: DBMS_OPTIM_ADMINDIR
+    Path = /u01/db/rdbms/admin/
+
+    Directory Name: DBMS_OPTIM_LOGDIR
+    Path = /u01/db/cfgtoollogs/
+
+    Directory Name: JAVA$JOX$CUJS$DIRECTORY$
+    Path = /u01/db/javavm/admin/
+
+    Directory Name: OPATCH_INST_DIR
+    Path = /u01/db/OPatch/
+
+    Directory Name: OPATCH_LOG_DIR
+    Path = /u01/db/rdbms/log/
+
+    Directory Name: OPATCH_SCRIPT_DIR
+    Path = /u01/db/QOpatch/
+
+    Directory Name: ORACLE_BASE
+    Path = /u01/app/oracle/
+
+    Directory Name: ORACLE_HOME
+    Path = /u01/db/
+
+    Directory Name: ORACLE_OCM_CONFIG_DIR
+    Path = /u01/db/ccr/state/
+    Users or roles with access: ORACLE_OCM(READ), ORACLE_OCM(WRITE)
+
+    Directory Name: ORACLE_OCM_CONFIG_DIR2
+    Path = /u01/db/ccr/state/
+    Users or roles with access: ORACLE_OCM(READ), ORACLE_OCM(WRITE)
+
+    Directory Name: SDO_DIR_ADMIN
+    Path = /u01/db/md/admin/
+
+    Directory Name: SDO_DIR_WORK
+    Path =
+
+    Directory Name: XMLDIR
+    Path = /u01/db/rdbms/xml/
+
+    Directory Name: XSDDIR
+    Path = /u01/db/rdbms/xml/schema/
+
+
+    Access to $ORACLE_HOME: ORACLE_HOME
+Remarks:
+    Directory objects allow access to the server's file system from PL/SQL
+    code within the database. Access to files that are used by the database
+    kernel itself should not be permitted, as this may alter the operation
+    of the database and bypass its access controls.
+
+* Database Links *
+Status: Low Risk
+Summary:
+    Found 1 database link. Database link names may not be same as remote
+    database connection they define.
+Details:
+    GLOBAL_NAMES=FALSE
+
+    Users with CREATE DATABASE LINK privilege: SYSTEM
+    Users with CREATE PUBLIC DATABASE LINK privilege: SYSTEM
+
+    Private links:
+    SYS: SYS_HUB
+
+Remarks:
+    Database links allow users to execute SQL statements that access tables
+    in other databases. This allows for both querying and storing data on
+    the remote database. It is advisable to set GLOBAL_NAMES to TRUE in
+    order to ensure that link names match the databases they access.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.2.3
+    Oracle Database 12c STIG  v1 r10: Rule SV-75941r1, SV-75997r1,
+    SV_76019r1
+
+* Network Access Control *
+Status: Evaluate
+Summary:
+    Found 2 network ACLs.
+Details:
+    NETWORK_ACL_86B64B66DF95012EE053F706E80A06B7 (Host: *, Ports: Min -
+        Max)
+    Principal: ORACLE_OCM, Action: deny, Privilege: resolve
+    Principal: GGSYS, Action: deny, Privilege: resolve
+    Principal: GSMADMIN_INTERNAL, Action: deny, Privilege: resolve
+
+    /sys/acls/oracle-sysman-ocm-Resolve-Access.xml (Host: localhost, Ports:
+        Min - Max)
+    Principal: ORACLE_OCM, Action: deny, Privilege: resolve
+    Principal: GGSYS, Action: deny, Privilege: resolve
+    Principal: GSMADMIN_INTERNAL, Action: deny, Privilege: resolve
+
+Remarks:
+    Network ACLs control the external servers that database users can
+    access using network packages such as UTL_TCP and UTL_HTTP.
+    Specifically, a database user needs the connect privilege to an
+    external network host computer if he or she is connecting using the
+    UTL_TCP, UTL_HTTP, UTL_SMTP, and UTL_MAIL utility packages. To convert
+    between a host name and its IP address using the UTL_INADDR package,
+    the resolve privilege is required. Make sure that these permissions are
+    limited to the minimum required by each user.
+
+* XML Database Access Control *
+Status: Evaluate
+Summary:
+    Found 9 XML Database ACLs.
+Details:
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Public:All privileges to PUBLIC
+    Principal: PUBLIC, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Private:All privileges to OWNER only and not accessible to
+        others
+    Principal: dav:owner, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Read-Only:Readable by all and writeable by none
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+    Principal: OLAP_XS_ADMIN, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+    Principal: OLAP_XS_ADMIN, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+    Principal: OLAP_XS_ADMIN, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+    Principal: OLAP_XS_ADMIN, Action: grant, Privileges: all
+
+    Namespace: {http://xmlns.oracle.com/xdb/acl.xsd}
+    Description: Protected:Readable by PUBLIC and all privileges to OWNER
+    Principal: dav:owner, Action: grant, Privileges: all
+    Principal: XDBADMIN, Action: grant, Privileges: all
+    Principal: PUBLIC, Action: grant, Privileges: read-properties, read-
+        contents, read-acl, resolve
+    Principal: OLAP_XS_ADMIN, Action: grant, Privileges: all
+
+Remarks:
+    XML ACLs control access to database resources using the XML DB feature.
+    Every resource in the Oracle XML DB Repository hierarchy has an
+    associated ACL. The ACL mechanism specifies a privilege-based access
+    control for resources to principals, which are database users or roles.
+    Whenever a resource is accessed, a security check is performed, and the
+    ACL determines if the requesting user has sufficient privileges to
+    access the resource. Make sure that these privileges are limited to the
+    minimum required by each user.
+
+* Database Backup *
+Status: Medium Risk
+Summary:
+    Found RMAN Backup Utility Usage.
+Details:
+    Last Full Backup was taken on Sun Nov 24 2019 08:00:00.
+    Last Log Backup was taken on Sun Nov 24 2019 08:00:00.
+    No Backups were created on Tape using Oracle Secure Backup in the last
+        90 days.
+    Found 21 Unencrypted Backup Pieces out of total 21 Backup Pieces made
+        in last 90 days.
+Remarks:
+    Database should be backed up regularly to prevent loss of data in the
+    event of a system failure. Oracle Recovery Manager (RMAN) allows
+    performing backup and recovery tasks on your databases. Unencrypted
+    backup data should not be transported on tape or disk to offsite
+    storage for  safekeeping. Oracle Secure Backup(OSB) may also be used
+    for tape data protection in distributed environment.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76179r1, SV-76183r1, SV-
+    76185r1, SV-76187r1, SV-76189r1, SV-76191r1
+
+### Network Configuration ###
+
+* Network Encryption *
+Status: Medium Risk
+Summary:
+    Native encryption is accepted but not required. Integrity check using
+    checksums is accepted but not required.
+Details:
+    SQLNET.ENCRYPTION_SERVER is not set (default value = ACCEPTED).
+    SQLNET.CRYPTO_CHECKSUM_SERVER is not set (default value = ACCEPTED).
+
+    Examined 1 listener.
+
+    LISTENER: IPC (1), TCP (1), TCPS (0)
+
+    SSL_CERT_REVOCATION is not set (default value = NONE).
+Remarks:
+    Network encryption protects the confidentiality and integrity of
+    communication between the database server and its clients. Either
+    Native Encryption or TLS should be configured to ensure that the
+    connections from clients are encrypted. For Native Encryption, both
+    ENCRYPTION_SERVER and CRYPTO_CHECKSUM_SERVER should be set to REQUIRED.
+    For ease of deployment and compatibility, Oracle Database servers and
+    clients are set to ACCEPT encrypted connections out of the box. This
+    means that you can enable the desired encryption and integrity settings
+    for a connection pair by configuring just one side of the connection,
+    server-side or client-side. So, for example, if there are many Oracle
+    clients connecting to an Oracle database instance, you can configure
+    the required encryption and integrity settings for all these
+    connections by making the appropriate sqlnet.ora changes at the server
+    end. You do not need to implement configuration changes for each client
+    separately. However, in this case, the risk of having plaintext data
+    passed over the network still exists. Keep in mind that whether the
+    security service is enabled or not it is based on a combination of
+    client and server configuration parameters.  If TLS is used, TCPS
+    should be specified for all network ports and SSL_CERT_REVOCATION
+    should be set to REQUIRED.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75937r2, SV-76035r5, SV-
+    76165r1, SV-76193r2, SV-76195r2, SV-76203r4, SV-76205r4, SV-76231r3,
+    SV-76233r2, SV-76239r1, SV-76241r1, SV-76305r4
+
+* Client Nodes *
+Status: Medium Risk
+Summary:
+    Valid node check is not enabled, can accept connections from any
+    client. Neither TCP.INVITED_NODES nor TCP.EXCLUDED_NODES is set.
+Details:
+    TCP.VALIDNODE_CHECKING is not set (default value = NO). Recommended
+        value is YES.
+    TCP.INVITED_NODES is not set.
+    TCP.EXCLUDED_NODES is not set.
+Remarks:
+    TCP.VALIDNODE_CHECKING should be enabled to control which client nodes
+    can connect to the database server. Either a whitelist of client
+    nodes(IP Address/Hostname/Subnet) allowed to connect
+    (TCP.INVITED_NODES) or a blacklist of nodes that are not allowed
+    (TCP.EXCLUDED_NODES) may be specified. Configuring both lists is an
+    error; only the invited node list will be used in this case.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75985r1, SV-76005r2, SV-
+    76305r4
+
+* SQLNET Banners *
+Status: Evaluate
+Summary:
+    Connect banners are not fully configured.
+Details:
+    SEC_USER_AUDIT_ACTION_BANNER is not set. Should be set to a proper
+        value.
+    SEC_USER_UNAUTHORIZED_ACCESS_BANNER is not set. Should be set to a
+        proper value.
+Remarks:
+    These banner messages are used to warn connecting users that
+    unauthorized access is not permitted and that their activities may be
+    audited.
+
+* Network Listener Configuration *
+Status: Medium Risk
+Summary:
+    Examined 1 listener. Found 1 listener not configured properly.
+Details:
+    Listeners not configured properly: LISTENER
+
+    Parameter setting for LISTENER:
+    ADMIN_RESTRICTIONS_LISTENER is not set (default value = OFF).
+        Recommended value is ON.
+    DYNAMIC_REGISTRATION_LISTENER is not set (default value = ON).
+        Recommended value is OFF.
+    VALID_NODE_CHECKING_REGISTRATION_LISTENER is not set (default value =
+        OFF). Should not be set to OFF.
+    SECURE_PROTOCOL_LISTENER is not set.
+    SECURE_CONTROL_LISTENER is not set.
+    SECURE_REGISTER_LISTENER is not set.
+
+    CONNECTION_RATE_LISTENER is not set.
+
+Remarks:
+    These parameters are used to limit changes to the network listener
+    configuration. ADMIN_RESTRICTIONS should be enabled to prevent
+    parameter changes to the running listener. One of the following
+    restrictions on service registration should be implemented: (a) prevent
+    changes by disabling DYNAMIC_REGISTRATION, (b) limit the nodes that can
+    make changes by enabling VALID_NODE_CHECKING_REGISTRATION, or (c) limit
+    the network sources for changes using the COST parameters
+    SECURE_PROTOCOL, SECURE_CONTROL, and SECURE_REGISTER. CONNECTION_RATE
+    determines rate enforced across all the endpoints that are rate
+    limited.
+References:
+    CIS Oracle Database 12c Benchmark v2.0.0: Recommendation 2.1.1, 2.1.3,
+    2.1.4
+    Oracle Database 12c STIG  v1 r10: Rule SV-76273r1, SV-76305r4
+
+* Listener Logging Control *
+Status: Pass
+Summary:
+    Examined 1 listener. Found 0 listener not configured properly.
+Details:
+    Listeners configured properly: LISTENER
+
+    Parameter setting for LISTENER:
+    LOGGING_LISTENER is not set (default value = ON).
+Remarks:
+    This parameter enables logging of listener activity. Log information
+    can be useful for troubleshooting and to provide early warning of
+    attempted attacks.
+
+### Operating System ###
+
+* OS Authentication *
+Status: Evaluate
+Summary:
+    2 OS users can connect to the database via OS authentication.
+Details:
+    SYSDBA [dba group]: oracle, donghua
+    SYSOPER [dba group]: oracle, donghua
+    SYSBACKUP [dba group]: oracle, donghua
+    SYSKM [dba group]: oracle, donghua
+    SYSDG [dba group]: oracle, donghua
+    SYSRAC [dba group]: oracle, donghua
+Remarks:
+    OS authentication allows operating system users within the specified
+    user group to connect to the database with administrative privileges
+    without any further authentication. This shows the OS group names and
+    users that can exercise each administrative privilege. OS users with
+    administrative privileges should be reviewed to prevent any
+    unauthorized, malicious or unintentional access to the database.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75977r1, SV-76027r1
+
+* Process Monitor Processes *
+Status: Pass
+Summary:
+    Found 2 PMON processes. The owner of the PMON process matches the
+    ORACLE_HOME owner.
+Details:
+    PMON process: ora_pmon_orcl, Owner: oracle
+    ORACLE_HOME owner: oracle
+
+    Other PMON processes found:
+            Owner: oracle, Command: asm_pmon_+ASM
+Remarks:
+    The PMON process monitors user processes and frees resources when they
+    terminate. This process should run with the user ID of the ORACLE_HOME
+    owner.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76069r1
+
+* Agent Processes *
+Status: Low Risk
+Summary:
+    Some Agent process owners overlap with Listener or PMON process owners.
+Details:
+    Owner: oracle
+    Command: /u01/grid/bin/oraagent.bin
+
+    Owner: oracle
+    Command: /u01/grid/bin/cssdagent
+Remarks:
+    Agent processes are used by Oracle Enterprise Manager to monitor and
+    manage the database. These processes should run with a user ID separate
+    from the database and listener processes.
+
+* Listener Processes *
+Status: Low Risk
+Summary:
+    Found 1 Listener process. Some Listener process are owned byAgent or
+    PMON process owners.
+Details:
+    Owner: oracle
+    Command: /u01/grid/bin/tnslsnr LISTENER -no_crs_notify -inheritSecurity
+        for Listener not set to Local OS Authentication.
+Remarks:
+    Listener processes accept incoming network connections and connect them
+    to the appropriate database server process. These processes should run
+    with a user ID separate from the database and agent processes. These
+    processes should be administered only through local OS authentication.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-75931r1
+
+* File Permissions in ORACLE_HOME *
+Status: Medium Risk
+Summary:
+    Examined 605 files. Found 10 errors.
+Details:
+    ORACLE_HOME: /u01/db
+    ORACLE_HOME owner: oracle
+    Directories: 5 (0 permission errors)
+    Executables in $ORACLE_HOME/bin: 228 (0 permission errors)
+    Configuration files in $TNS_ADMIN: 2 (0 permission errors)
+    Data files in $ORACLE_HOME/dbs: 13 (3 permission errors)
+    Libraries in $ORACLE_HOME/lib: 357 (7 permission errors)
+
+    Files with permission errors:
+    dbs/init.ora (rw-r--r-- should be rw-r-----)
+    dbs/initorcl2.ora (rw-r--r-- should be rw-r-----)
+    dbs/initorcl.ora (rw-r--r-- should be rw-r-----)
+    lib/libdpsadapi19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libdpsadrda19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libdpsc19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libdpsf19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libdpsp19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libdpss19.a (rw-rw-r-- should be rw-r--r--)
+    lib/libedtn19.a (rw-rw-r-- should be rw-r--r--)
+
+Remarks:
+    The ORACLE_HOME directory and its subdirectories contain files that are
+    critical to the correct operation of the database, including executable
+    programs, libraries, data files, and configuration files. Operating
+    system file permissions must not allow these files to be modified by
+    users other than the ORACLE_HOME owner and must not allow other users
+    to directly read the contents of Oracle data files.
+References:
+    Oracle Database 12c STIG  v1 r10: Rule SV-76001r1, SV-76277r1, SV-
+    76359r1, SV-76365r1
+
+
+----------
+    This report provides information and recommendations that may be
+    helpful in securing your Oracle database system. These recommendations
+    reflect best practices for database security and should be part of any
+    strategy for Data Protection by Design and by Default. These practices
+    may help in addressing Articles 25 and 32 of the EU General Data
+    Protection Regulation as well as other data privacy regulations.
+    Technical controls alone are not sufficient for compliance. Passing all
+    findings does not guarantee compliance. 
+
+    Oracle Database Vault, Oracle Advanced Security, Oracle Label Security,
+    Oracle Data Masking and Subsetting Pack are database licensed options.
+    Oracle Key Vault and Oracle Audit Vault and Database Firewall require
+    separate licensing as well. 
+
+    The report provides a view on the current status. The results shown are
+    provided for informational purposes only and should not be used as a
+    substitute for a thorough analysis or interpreted to contain any legal
+    or regulatory advice or guidance. 
+
+    You are solely responsible for your system, and the data and
+    information gathered during the production of this report. You are also
+    solely responsible for the execution of software to produce this
+    report, and for the effect and results of the execution of any
+    mitigating actions identified herein. 
+
+    Oracle provides this analysis on an "as is" basis without warranty of
+    any kind and Oracle hereby disclaims all warranties and conditions
+    whether express, implied or statutory. 
+
