@@ -64,24 +64,26 @@ end;
 /
 
 SQL> declare
-    checksum_sqlstr         varchar2(4000);
-    sqlstr                  varchar2(4000);
-begin
-for x in (select distinct department_id from hr.employees) loop
-    checksum_sqlstr := 'select first_name,last_name,email,phone_number from hr.employees where nvl(department_id,0)='
-                ||nvl(x.department_id,0)
-                ||' order by employee_id';
-    sqlstr := 'insert into employees_checksum '
-                ||'select department_id,  DBMS_SQLHASH.GETHASH('''||checksum_sqlstr||''', digest_type => 1)'
-                ||' from hr.employees where nvl(department_id,0)='
-                ||nvl(x.department_id,0)
-                ||' and rownum<2';
-    -- dbms_output.put_line(sqlstr);
-    execute immediate sqlstr;
-end loop;
-    commit;
-end;
-/  2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19  
+  2  	 checksum_sqlstr	 varchar2(4000);
+  3  	 sqlstr 		 varchar2(4000);
+  4  begin
+  5  for x in (select distinct department_id from hr.employees) loop
+  6  	 checksum_sqlstr := 'select first_name,last_name,email,phone_number from hr.employees where nvl(department_id,0)='
+  7  		     ||nvl(x.department_id,0)
+  8  		     ||' order by employee_id';
+  9  	 sqlstr := 'insert into employees_checksum '
+ 10  		     ||'select department_id,  DBMS_SQLHASH.GETHASH('''||checksum_sqlstr||''', digest_type => 1)'
+ 11  		     ||' from hr.employees where nvl(department_id,0)='
+ 12  		     ||nvl(x.department_id,0)
+ 13  		     ||' and rownum<2';
+ 14  	 -- dbms_output.put_line(sqlstr);
+ 15  	 execute immediate sqlstr;
+ 16  end loop;
+ 17  	 commit;
+ 18  end;
+ 19  /
+
+PL/SQL procedure successfully completed.
 
 PL/SQL procedure successfully completed.
 
