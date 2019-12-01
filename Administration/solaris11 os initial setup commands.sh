@@ -254,11 +254,77 @@ rpool  200G  10.0G  190G   5%  1.00x  ONLINE  -
 root@solaris11:~# 
 
 root@solaris11:~# zfs create -o mountpoint=/ips -o quota=20g rpool/ips
-cannot create 'rpool/ips': dataset already exists
 root@solaris11:~# df -h /ips
 Filesystem             Size   Used  Available Capacity  Mounted on
 rpool/ips               20G    31K        20G     1%    /ips
-root@solaris11:~# 
+
+Tip - For better performance when updating the repository, set atime to off.
+
+root@solaris11:~#  zfs set atime=off rpool/ips
+root@solaris11:~# zfs get all rpool/ips
+NAME       PROPERTY              VALUE                  SOURCE
+rpool/ips  aclinherit            restricted             default
+rpool/ips  aclmode               discard                default
+rpool/ips  atime                 off                    local
+rpool/ips  available             20.0G                  -
+rpool/ips  canmount              on                     default
+rpool/ips  casesensitivity       mixed                  -
+rpool/ips  checksum              on                     default
+rpool/ips  compression           off                    default
+rpool/ips  compressratio         1.00x                  -
+rpool/ips  copies                1                      default
+rpool/ips  creation              Sun Dec  1 22:28 2019  -
+rpool/ips  dedup                 off                    default
+rpool/ips  defaultgroupquota     none                   -
+rpool/ips  defaultreadlimit      none                   default
+rpool/ips  defaultuserquota      none                   -
+rpool/ips  defaultwritelimit     none                   default
+rpool/ips  devices               on                     default
+rpool/ips  effectivereadlimit    none                   local
+rpool/ips  effectivewritelimit   none                   local
+rpool/ips  encryption            off                    -
+rpool/ips  exec                  on                     default
+rpool/ips  keychangedate         -                      default
+rpool/ips  keysource             none                   default
+rpool/ips  keystatus             none                   -
+rpool/ips  logbias               latency                default
+rpool/ips  mlslabel              none                   -
+rpool/ips  mounted               yes                    -
+rpool/ips  mountpoint            /ips                   local
+rpool/ips  multilevel            off                    -
+rpool/ips  nbmand                off                    default
+rpool/ips  normalization         none                   -
+rpool/ips  primarycache          all                    default
+rpool/ips  quota                 20G                    local
+rpool/ips  readlimit             default                default
+rpool/ips  readonly              off                    default
+rpool/ips  recordsize            128K                   default
+rpool/ips  referenced            31K                    -
+rpool/ips  refquota              none                   default
+rpool/ips  refreservation        none                   default
+rpool/ips  rekeydate             -                      default
+rpool/ips  reservation           none                   default
+rpool/ips  rstchown              on                     default
+rpool/ips  secondarycache        all                    default
+rpool/ips  setuid                on                     default
+rpool/ips  shadow                none                   -
+rpool/ips  share.*               ...                    local
+rpool/ips  snapdir               hidden                 default
+rpool/ips  sync                  standard               default
+rpool/ips  type                  filesystem             -
+rpool/ips  used                  31K                    -
+rpool/ips  usedbychildren        0                      -
+rpool/ips  usedbydataset         31K                    -
+rpool/ips  usedbyrefreservation  0                      -
+rpool/ips  usedbysnapshots       0                      -
+rpool/ips  utf8only              off                    -
+rpool/ips  version               6                      -
+rpool/ips  vscan                 off                    default
+rpool/ips  writelimit            default                default
+rpool/ips  xattr                 on                     default
+rpool/ips  zoned                 off                    default
+
+
 
 root@solaris11:~# zfs create -o mountpoint=/u01 -o quota=20g rpool/u01
 root@solaris11:~# zfs create -o mountpoint=/u02 -o quota=20g rpool/u02
@@ -305,4 +371,181 @@ swapfile                 dev            swaplo      blocks        free
 /dev/zvol/dsk/rpool/swap 231,1              4K        2.0G        2.0G 
 /dev/zvol/dsk/rpool/swap 231,1            2.0G        6.0G        6.0G 
 
+
+root@solaris11:~# ls -l /root/ips
+-rw-r--r--   1 root     root         12K Dec  1 22:32 install-repo.ksh
+-rw-r--r--   1 root     root        4.2K Dec  1 22:32 README-zipped-repo.txt
+-rw-r--r--   1 root     root         495 Dec  1 22:32 sol-11_4-repo_digest.txt
+-rw-r--r--   1 root     root        6.7K Dec  1 22:32 V979527-01.zip
+-rw-r--r--   1 root     root        1.8G Dec  1 22:34 V979528-01_1of5.zip
+-rw-r--r--   1 root     root        1.7G Dec  1 22:36 V979528-01_2of5.zip
+-rw-r--r--   1 root     root        1.7G Dec  1 22:39 V979528-01_3of5.zip
+-rw-r--r--   1 root     root        2.0G Dec  1 22:49 V979528-01_4of5.zip
+-rw-r--r--   1 root     root        1.8G Dec  1 22:51 V979528-01_5of5.zip
+
+oot@solaris11:~/ips# chmod +x ./install-repo.ksh 
+root@solaris11:~/ips# ./install-repo.ksh 
+USAGE:
+install-repo.ksh -d dest [-s zipsrc] [-i image-name] [-c] [-v] [-I] [-y]
+
+-d dest   = destination directory to hold repository
+-s zipsrc = full path to directory holding zip files. default: current directory
+-i image  = name of image: e.g. sol-11_2-repo. default: name found in directory
+-c        = compare digests of downloaded zip files
+-v        = verify repo after unzipping (minimum Solaris 11.1.7 required)
+-I        = create an ISO image
+-y        = add to existing repository without prompting for yes or no. Use
+            with caution.
+
+Destination directory will contain top-level ISO files including README.
+Repository is directly under destination.
+ISO image is created in current directory, or zipsrc directory from -s argument.
+
+root@solaris11:~/ips# ./install-repo.ksh -d /ips -s /root/ips
+Using V979528-01 files for sol-11_4-repo download.
+Uncompressing V979528-01_1of5.zip...done.
+Uncompressing V979528-01_2of5.zip...done.   
+Uncompressing V979528-01_3of5.zip...done.
+Uncompressing V979528-01_4of5.zip...done.
+Uncompressing V979528-01_5of5.zip...done.
+Repository can be found in /ips.
+
+root@solaris11:/ips# df -h /ips
+Filesystem             Size   Used  Available Capacity  Mounted on
+rpool/ips               20G    10G      10.0G    51%    /ips
+
+root@solaris11:/ips# zfs set quota=30g rpool/ips
+
+root@solaris11:/ips# zfs list rpool/ips
+NAME        USED  AVAIL  REFER  MOUNTPOINT
+rpool/ips  10.0G  20.0G  10.0G  /ips
+
+root@solaris11:/ips# df -h /ips
+Filesystem             Size   Used  Available Capacity  Mounted on
+rpool/ips               30G    10G        20G    34%    /ips
+
+root@solaris11:~/ips# pkgrepo info -s /ips
+Failed to set locale: unsupported locale setting.  Falling back to C.
+pkgrepo: Unable to set locale; locale package may be broken or
+not installed.  Reverting to C locale.
+PUBLISHER PACKAGES STATUS           UPDATED
+solaris   6431     online           2018-08-17T06:09:37.827853Z
+
+root@solaris11:~/ips# export LC_ALL="en_US.UTF-8"
+root@solaris11:~/ips# export LC_CTYPE="en_US.UTF-8"
+root@solaris11:~/ips# pkgrepo info -s /ips
+PUBLISHER PACKAGES STATUS           UPDATED
+solaris   6431     online           2018-08-17T06:09:37.827853Z
+
+root@solaris11:~/ips# cat ~/.bash_profile
+export LC_ALL="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+
+root@solaris11:~/ips# pkg install oracle-database-preinstall-19c
+
+pkg install: The following pattern(s) did not match any allowable packages.  Try
+using a different matching pattern, or refreshing publisher information:
+
+        oracle-database-preinstall-19c
+
+# regularlly update local repo
+pkgrecv -s http://pkg.oracle.com/solaris/release/ -d /ips '*'
+pkgrepo -s /ips refresh
+
+# alternative way to build local repo from internet repo
+pkgrepo create /ips
+pkgrecv -s http://pkg.oracle.com/solaris/release/ -d /ips '*'
+
+
+root@solaris11:~/ips# pkgrepo get -p solaris -s http://pkg.oracle.com/solaris/release
+PUBLISHER SECTION    PROPERTY         VALUE
+solaris   publisher  alias            
+solaris   publisher  prefix           solaris
+solaris   repository collection-type  core
+solaris   repository description      ""
+solaris   repository legal-uris       ()
+solaris   repository mirrors          ()
+solaris   repository name             ""
+solaris   repository origins          ()
+solaris   repository refresh-seconds  ""
+solaris   repository registration-uri ""
+solaris   repository related-uris     ()
+root@solaris11:~/ips# pkgrepo get -p solaris -s /ips
+PUBLISHER SECTION    PROPERTY         VALUE
+solaris   publisher  alias            
+solaris   publisher  prefix           solaris
+solaris   repository collection-type  core
+solaris   repository description      ""
+solaris   repository legal-uris       ()
+solaris   repository mirrors          ()
+solaris   repository name             ""
+solaris   repository origins          ()
+solaris   repository refresh-seconds  ""
+solaris   repository registration-uri ""
+solaris   repository related-uris     ()
+
+
+root@solaris11:/var/log# pkg search -s http://pkg.oracle.com/solaris/release 18c
+INDEX       ACTION VALUE                                        PACKAGE
+pkg.summary set    Prerequisite package for Oracle Database 18c pkg:/group/prerequisite/oracle/oracle-rdbms-server-18c-preinstall@11.4-11.4.0.0.1.15.0
+
+root@solaris11:/var/log# pkg search -s /ips prerequisite
+INDEX       ACTION VALUE                                               PACKAGE
+pkg.summary set    Prerequisite package for Oracle Database 12.1       pkg:/group/prerequisite/oracle/oracle-rdbms-server-12-1-preinstall@11.4-11.4.0.0.1.15.0
+pkg.summary set    Prerequisite package for Oracle Database 18c        pkg:/group/prerequisite/oracle/oracle-rdbms-server-18c-preinstall@11.4-11.4.0.0.1.15.0
+pkg.summary set    Prerequisite package for Oracle E-Business Suite 12 pkg:/group/prerequisite/oracle/oracle-ebs-server-R12-preinstall@11.4-11.4.0.0.1.15.0
+root@solaris11:/var/log# 
+
+
+root@solaris11:/var/log# uname -a
+SunOS solaris11 5.11 11.4.0.15.0 i86pc i386 i86pc
+
+root@solaris11:/var/log# pkg info entire
+          Name: entire
+       Summary: Incorporation to lock all system packages to the same build
+   Description: This package constrains system package versions to the same
+                build.  WARNING: Proper system update and correct package
+                selection depend on the presence of this incorporation.
+                Removing this package will result in an unsupported system.
+      Category: Meta Packages/Incorporations
+         State: Installed
+     Publisher: solaris
+       Version: 11.4 (Oracle Solaris 11.4.0.0.1.15.0)
+        Branch: 11.4.0.0.1.15.0
+Packaging Date: August 17, 2018 at 12:42:03 AM
+          Size: 2.53 kB
+          FMRI: pkg://solaris/entire@11.4-11.4.0.0.1.15.0:20180817T004203Z
+root@solaris11:/var/log# 
+
+
+root@solaris11:/var/log# pkg install -g /ips pkg:/group/prerequisite/oracle/oracle-rdbms-server-18c-preinstall 
+           Packages to install: 24
+            Services to change:  4
+       Create boot environment: No
+Create backup boot environment: No
+
+DOWNLOAD                                PKGS         FILES    XFER (MB)   SPEED
+Completed                              24/24       486/486  103.9/103.9  9.3M/s
+
+PHASE                                          ITEMS
+Installing new actions                     1211/1211
+Updating package state database                 Done 
+Updating package cache                           0/0 
+Updating image state                            Done 
+Creating fast lookup database                   Done 
+Updating package cache                           1/1 
+root@solaris11:/var/log# 
+root@solaris11:/var/log# 
+
+root@solaris11:/var/log# groupadd -g 500 oinstall
+root@solaris11:/var/log# groupadd -g 501 dba
+root@solaris11:/var/log# useradd -u 500 -g oinstall -G dba -m -d /export/home/oracle oracle
+80 blocks
+root@solaris11:/var/log# passwd oracle
+New Password: 
+Re-enter new Password: 
+passwd: password successfully changed for oracle
+root@solaris11:/var/log# mkdir -p /u01/app/oracle /u01/db /u02/oradata /u03/fra
+root@solaris11:/var/log# chown -R oracle:oinstall /u01
+root@solaris11:/var/log# chown -R oracle:dba /u02 /u03
 
