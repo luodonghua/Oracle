@@ -500,6 +500,30 @@ root@solaris11:/var/log#
 root@solaris11:/var/log# uname -a
 SunOS solaris11 5.11 11.4.0.15.0 i86pc i386 i86pc
 
+
+root@solaris11:~# pkg publisher
+PUBLISHER                   TYPE     STATUS P LOCATION
+solaris                     origin   online F http://pkg.oracle.com/solaris/release/
+
+root@solaris11:~# pkg unset-publisher solaris
+Updating package cache                           1/1 
+
+root@solaris11:~# pkg set-publisher -g /ips solaris
+
+root@solaris11:~# pkg publisher
+
+PUBLISHER                   TYPE     STATUS P LOCATION
+solaris                     origin   online F file:///ips/
+
+root@solaris11:~# pkg update
+No updates available for this image.
+
+#https://www.thegeekdiary.com/solaris-11-ips-hand-on-lab-creating-ips-repository/
+# pkg set-publisher -G '*' -M '*' -g /sol_11_repo solaris
+#-G '*' -> Removes all existing origins for the solaris publisher.
+#-M '*' -> Removes all existing mirrors for the solaris publisher.
+#-g  -> Adds the URI of the newly-created repository as the new origin for the solaris publisher.
+
 root@solaris11:/var/log# pkg info entire
           Name: entire
        Summary: Incorporation to lock all system packages to the same build
@@ -548,4 +572,91 @@ passwd: password successfully changed for oracle
 root@solaris11:/var/log# mkdir -p /u01/app/oracle /u01/db /u02/oradata /u03/fra
 root@solaris11:/var/log# chown -R oracle:oinstall /u01
 root@solaris11:/var/log# chown -R oracle:dba /u02 /u03
+
+ot@solaris11:~# 
+root@solaris11:~# prctl -n project.max-shm-memory -i project default
+project: 3: default
+NAME    PRIVILEGE       VALUE    FLAG   ACTION                       RECIPIENT
+project.max-shm-memory
+        usage               0B   
+        privileged      2.42GB      -   deny                                 -
+        system          16.0EB    max   deny                                 -
+
+root@solaris11:~# prctl -n project.max-sem-ids -i project default
+project: 3: default
+NAME    PRIVILEGE       VALUE    FLAG   ACTION                       RECIPIENT
+project.max-sem-ids
+        privileged        128       -   deny                                 -
+        system          16.8M     max   deny                                 -
+
+root@solaris11:~# prctl -n project.max-shm-memory -v 6gb -r -i project default
+root@solaris11:~# prctl -n project.max-shm-memory -i project default
+project: 3: default
+NAME    PRIVILEGE       VALUE    FLAG   ACTION                       RECIPIENT
+project.max-shm-memory
+        usage               0B   
+        privileged      6.00GB      -   deny                                 -
+        system          16.0EB    max   deny        
+
+
+# create Oracle project
+root@solaris11:~# projadd -G dba -K "project.max-shm-memory=(privileged,9G,deny)" group.dba
+root@solaris11:~# projmod -sK "project.max-sem-ids=(privileged,256,deny)" group.dba
+
+# Not necessary to add oracle user into this group, just to take note project file change only effective after reboot
+root@solaris11:~# projmod -U oracle group.dba 
+root@solaris11:~# cat /etc/project 
+system:0::::
+user.root:1::::
+noproject:2::::
+default:3::::
+group.staff:10::::
+group.dba:101::oracle:dba:project.max-sem-ids=(privileged,256,deny);project.max-shm-memory=(privileged,9663676416,deny)
+
+# UDP and TCP Kernel Parameters
+root@solaris11:~# ipadm show-prop -p smallest_anon_port,largest_anon_port tcp
+PROTO PROPERTY              PERM CURRENT      PERSISTENT   DEFAULT      POSSIBLE
+tcp   smallest-anon-port    rw   32768        --           32768        1024-65535
+tcp   largest-anon-port     rw   65535        --           65535        32768-65535
+root@solaris11:~# ipadm set-prop -p smallest_anon_port=9000 tcp
+root@solaris11:~# ipadm set-prop -p largest_anon_port=65500 tcp
+root@solaris11:~# ipadm set-prop -p smallest_anon_port=9000 udp
+root@solaris11:~# ipadm set-prop -p largest_anon_port=65500 udp
+root@solaris11:~# ipadm show-prop -p smallest_anon_port,largest_anon_port tcp
+PROTO PROPERTY              PERM CURRENT      PERSISTENT   DEFAULT      POSSIBLE
+tcp   smallest-anon-port    rw   9000         9000         32768        1024-65500
+tcp   largest-anon-port     rw   65500        65500        65535        9000-65535
+
+# Default soft limit & hard limit for shell
+root@solaris11:~# ulimit -aS
+core file size          (blocks, -c) unlimited
+data seg size           (kbytes, -d) unlimited
+file size               (blocks, -f) unlimited
+open files                      (-n) 256
+pipe size            (512 bytes, -p) 10
+stack size              (kbytes, -s) 8192
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 29995
+virtual memory          (kbytes, -v) unlimited
+
+root@solaris11:~# ulimit -aH
+core file size          (blocks, -c) unlimited
+data seg size           (kbytes, -d) unlimited
+file size               (blocks, -f) unlimited
+open files                      (-n) 65536
+pipe size            (512 bytes, -p) 10
+stack size              (kbytes, -s) unlimited
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 29995
+virtual memory          (kbytes, -v) unlimited
+
+# Size of the stack segment of the process, soft (at most 10240), hard (at most 32768)
+root@solaris11:~# ulimit -S -s 10240
+
+# Open file descriptors, soft (at least 1024), hard (at least 65536)
+root@solaris11:~# ulimit -S -n 1024
+
+# Maximum user processes, soft (at least 2047), hard (at least 16384)
+# exist value larger than this.
+
 
