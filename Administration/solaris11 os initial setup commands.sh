@@ -1,3 +1,4 @@
+root@solaris11:~#  ipadm create-addr -T dhcp net0 -h solaris11
 root@solaris11:~# ipadm
 NAME              CLASS/TYPE STATE        UNDER      ADDR
 lo0               loopback   ok           --         --
@@ -669,9 +670,63 @@ ORACLE_SID=orcl
 ORACLE_BASE=/u01/app/oracle
 ORACLE_HOME=/u01/db
 LD_LIBRARY_PATH=$ORACLE_HOME/lib
-PATH=/usr/bin:/usr/local/bin:$ORACLE_HOME/bin:$ORACLE_HOME/OPatch
+PATH=/usr/bin:/usr/sbin:/usr/local/bin:$ORACLE_HOME/bin:$ORACLE_HOME/OPatch
 export ORACLE_SID ORACLE_BASE ORACLE_HOME LD_LIBRARY_PATH PATH
 
 export PS1=$'[(${ORACLE_SID:-"no sid"})\u@\h \W]$ '
 
 alias tailorcl='adrci exec="set home orcl/orcl;show alert -tail -f"'
+
+
+
+[(orcl)oracle@solaris11 ~]$ sqlplus / as sysdba
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Mon Dec 2 11:46:04 2019
+Version 19.5.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Connected to an idle instance.
+
+SQL> startup
+ORA-27125: unable to create shared memory segment
+Solaris-AMD64 Error: 22: Invalid argument
+Additional information: 2872
+Additional information: 16777216
+Additional information: 4096
+SQL> exit
+Disconnected
+
+[(orcl)oracle@solaris11 ~]$ id -p
+uid=500(oracle) gid=500(oinstall) projid=3(default)
+[(orcl)oracle@solaris11 ~]$  prctl -n project.max-shm-memory -i process $$
+process: 1325: -bash
+NAME    PRIVILEGE       VALUE    FLAG   ACTION                       RECIPIENT
+project.max-shm-memory
+        usage               0B   
+        privileged      2.42GB      -   deny                                 -
+        system          16.0EB    max   deny                                 -
+
+[(orcl)oracle@solaris11 ~]$ cat /etc/project 
+system:0::::
+user.root:1::::
+noproject:2::::
+default:3::::
+group.staff:10::::
+group.dba:101::oracle:dba:project.max-sem-ids=(privileged,256,deny);project.max-shm-memory=(privileged,9663676416,deny)
+
+
+-bash-4.4# projadd -G dba -K "project.max-shm-memory=(privileged,9G,deny)" user.oracle
+-bash-4.4#  projmod -sK "project.max-sem-ids=(privileged,256,deny)" user.oracle
+-bash-4.4# su - oracle
+Oracle Corporation      SunOS 5.11      11.4    Aug 2018
+[(orcl)oracle@solaris11 ~]$ id -p
+uid=500(oracle) gid=500(oinstall) projid=102(user.oracle)
+[(orcl)oracle@solaris11 ~]$ prctl -n project.max-shm-memory -i process $$
+process: 1374: -bash
+NAME    PRIVILEGE       VALUE    FLAG   ACTION                       RECIPIENT
+project.max-shm-memory
+        usage               0B   
+        privileged      9.00GB      -   deny                                 -
+        system          16.0EB    max   deny                                 -
+[(orcl)oracle@solaris11 ~]$ 
