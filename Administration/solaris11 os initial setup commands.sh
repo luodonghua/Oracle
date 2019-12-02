@@ -660,3 +660,18 @@ root@solaris11:~# ulimit -S -n 1024
 # exist value larger than this.
 
 
+# Bash Profile for "oracle" user 
+# File: /export/home/oracle/.bash_profile 
+export LC_ALL="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+
+ORACLE_SID=orcl
+ORACLE_BASE=/u01/app/oracle
+ORACLE_HOME=/u01/db
+LD_LIBRARY_PATH=$ORACLE_HOME/lib
+PATH=/usr/bin:/usr/local/bin:$ORACLE_HOME/bin:$ORACLE_HOME/OPatch
+export ORACLE_SID ORACLE_BASE ORACLE_HOME LD_LIBRARY_PATH PATH
+
+export PS1=$'[(${ORACLE_SID:-"no sid"})\u@\h \W]$ '
+
+alias tailorcl='adrci exec="set home orcl/orcl;show alert -tail -f"'
