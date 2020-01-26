@@ -1,0 +1,154 @@
+-- 1.2.1.4 Run OPatch Conflict Check
+
+[oracle@dbhost1 19.6.0]$ . oraenv
+ORACLE_SID = [orcl] ? +ASM
+The Oracle base remains unchanged with value /u01/app/oracle
+
+
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30557433
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30489227
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30489632
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30655595
+
+[oracle@dbhost1 19.6.0]$ . oraenv
+ORACLE_SID = [+ASM] ? orcl
+The Oracle base remains unchanged with value /u01/app/oracle
+
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30557433
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir /u01/stage/19.6.0/30501910/30489227
+
+/tmp/patch_list_gihome.txt
+/u01/stage/19.6.0/30501910/30557433
+/u01/stage/19.6.0/30501910/30489227
+/u01/stage/19.6.0/30501910/30489632
+/u01/stage/19.6.0/30501910/
+/u01/stage/19.6.0/30501910/30655595
+
+$ORACLE_HOME/OPatch/opatch prereq CheckSystemSpace -phBaseFile /tmp/patch_list_gihome.txt
+
+
+cat /tmp/patch_list_dbhome.txt
+/u01/stage/19.6.0/30501910/30557433
+/u01/stage/19.6.0/30501910/30489227
+$ORACLE_HOME/OPatch/opatch prereq CheckSystemSpace -phBaseFile /tmp/patch_list_dbhome.txt
+
+
+**********************************************************************
+
+To patch the GI home and all Oracle RAC database
+
+[root@dbhost1 ~]# export PATH=$PATH:/u01/grid/OPatch
+[root@dbhost1 ~]# opatchauto apply /u01/stage/19.6.0/30501910
+
+OPatchauto session is initiated at Fri Jan 24 16:25:53 2020
+
+System initialization log file is /u01/grid/cfgtoollogs/opatchautodb/systemconfig2020-01-24_04-25-55PM.log.
+
+Session log file is /u01/grid/cfgtoollogs/opatchauto/opatchauto2020-01-24_04-25-59PM.log
+The id for this session is 2766
+
+Executing OPatch prereq operations to verify patch applicability on home /u01/db
+Patch applicability verified successfully on home /u01/db
+
+
+Verifying SQL patch applicability on home /u01/db
+SQL patch applicability verified successfully on home /u01/db
+
+
+Executing OPatch prereq operations to verify patch applicability on home /u01/grid
+Patch applicability verified successfully on home /u01/grid
+
+
+Preparing to bring down database service on home /u01/db
+Successfully prepared home /u01/db to bring down database service
+
+
+Bringing down database service on home /u01/db
+Following database has been stopped and will be restarted later during the session: orcl
+Database service successfully brought down on home /u01/db
+
+
+Bringing down CRS service on home /u01/grid
+Prepatch operation log file location: /u01/app/oracle/crsdata/dbhost1/crsconfig/hapatch_2020-01-24_03-27-56AM.log
+CRS service brought down successfully on home /u01/grid
+
+
+Start applying binary patch on home /u01/db
+Binary patch applied successfully on home /u01/db
+
+
+Start applying binary patch on home /u01/grid
+Binary patch applied successfully on home /u01/grid
+
+
+Starting CRS service on home /u01/grid
+Postpatch operation log file location: /u01/app/oracle/crsdata/dbhost1/crsconfig/hapatch_2020-01-24_03-35-36AM.log
+CRS service started successfully on home /u01/grid
+
+
+Starting database service on home /u01/db
+Database service successfully started on home /u01/db
+
+
+Preparing home /u01/db after database service restarted
+No step execution required.........
+
+
+Trying to apply SQL patch on home /u01/db
+SQL patch applied successfully on home /u01/db
+
+OPatchAuto successful.
+
+--------------------------------Summary--------------------------------
+
+Patching is completed successfully. Please find the summary as follows:
+
+Host:dbhost1
+SIDB Home:/u01/db
+Version:19.0.0.0.0
+Summary:
+
+==Following patches were SKIPPED:
+
+Patch: /u01/stage/19.6.0/30501910/30489632
+Reason: This patch is not applicable to this specified target type - "oracle_database"
+
+Patch: /u01/stage/19.6.0/30501910/30655595
+Reason: This patch is not applicable to this specified target type - "oracle_database"
+
+
+==Following patches were SUCCESSFULLY applied:
+
+Patch: /u01/stage/19.6.0/30501910/30489227
+Log: /u01/db/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-28-21PM_1.log
+
+Patch: /u01/stage/19.6.0/30501910/30557433
+Log: /u01/db/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-28-21PM_1.log
+
+
+Host:dbhost1
+SIHA Home:/u01/grid
+Version:19.0.0.0.0
+Summary:
+
+==Following patches were SUCCESSFULLY applied:
+
+Patch: /u01/stage/19.6.0/30501910/30489227
+Log: /u01/grid/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-31-15PM_1.log
+
+Patch: /u01/stage/19.6.0/30501910/30489632
+Log: /u01/grid/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-31-15PM_1.log
+
+Patch: /u01/stage/19.6.0/30501910/30557433
+Log: /u01/grid/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-31-15PM_1.log
+
+Patch: /u01/stage/19.6.0/30501910/30655595
+Log: /u01/grid/cfgtoollogs/opatchauto/core/opatch/opatch2020-01-24_16-31-15PM_1.log
+
+
+
+OPatchauto session completed at Fri Jan 24 16:44:54 2020
+Time taken to complete the session 19 minutes, 1 second
+
+
