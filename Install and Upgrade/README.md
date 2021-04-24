@@ -1,4 +1,4 @@
-**** Install Oracle software binary in silence mode
+#### Install Oracle software binary in silence mode
 
 ```sh
 [oracle@ip-172-31-11-120 ~]$ unzip DB.19.11.GoldImage.zip -d /u01/db
@@ -31,7 +31,7 @@ cd /u01/db
 [root@ip-172-31-11-120 ~]# /u01/db/root.sh
 ```
 
-**** Create listener
+#### Create listener
 
 ```sh
 export ORACLE_BASE=/u01/app/oracle; \
@@ -43,7 +43,7 @@ export ORACLE_HOME=/u01/db; \
 /lisport 1521 /silent /orahnam OraDB19Home1
 ```
 
-**** Create Database Example 1:
+#### Create Database Example 1:
 
 ```sh
 export ORACLE_HOME=/u01/db; \
@@ -60,7 +60,7 @@ export ORACLE_BASE=/u01/app/oracle; \
 -initParams filesystemio_options=setall -ignorePrereqs    
 ```
 
-**** Create Database Example 2:
+#### Create Database Example 2:
 
 ```sh
 $ORACLE_HOME/bin/dbca -silent -createDatabase \
