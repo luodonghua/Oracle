@@ -68,3 +68,4 @@ from (
 )
 group by priv_type, privilege
 order by priv_type DESC, privilege;
+ 
