@@ -2,16 +2,22 @@ Setup steps, please reference doc here: https://docs.oracle.com/en-us/iaas/data-
 
 #### Scenario 1: Client doesn't import Server certificate/CA amd Server doesn't import client certificate/CA.
 (Regardless SSL_CLIENT_AUTHENTICATION=TRUE or FALSE)
+
 Result: connection failed
+
 Message: ORA-29024: Certificate validation failure
 
 #### Scenario 2: Client import Server certificate/CA amd Server doesn't import client certificate/CA.
 2.1 Testing with SSL_CLIENT_AUTHENTICATION = FALSE on server
+
 Result: Success
 
 2.2 Testing with SSL_CLIENT_AUTHENTICATION = TRUE on server
+
 Result: Connection failed
+
 Message: ORA-28860: Fatal SSL error
+
 Message in Listener log: 
 ```
 2021-08-02T04:50:44.966526+00:00
@@ -22,7 +28,9 @@ TNS-00542: SSL Handshake failed
 
 #### Scenario 3: Client import Server certificate/CA amd Server import client certificate/CA.
 (Regardless SSL_CLIENT_AUTHENTICATION=TRUE or FALSE)
+
 Result: OK
+
 Take note that 2-way SSL verification only happens if both client and server setting are true.
 
 #### Scenario 4: Built-on Scenario 3, Authenticate user using SSL Certification
@@ -41,6 +49,7 @@ Subject:        CN=ip-10-2-0-83.ap-southeast-1.compute.internal
 ```
 ##### take note: 1. ops$ and 2. identified externally. (globally is EUS user, not Certificate user)
 ##### for certification login, need SSL_CLIENT_AUTHENTICATION = TRUE on both client/server
+
 ```sql
 SQL> CREATE USER ops$clientuser1 IDENTIFIED EXTERNALLY AS 'CN=ip-10-2-0-80.ap-southeast-1.compute.internal';
 SQL> grant resource,connect to ops$clientuser1;
