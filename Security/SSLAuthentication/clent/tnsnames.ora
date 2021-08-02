@@ -1,0 +1,21 @@
+PDB1_SSL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCPS)(HOST = ip-10-2-0-83.ap-southeast-1.compute.internal)(PORT = 2484))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = pdb1)
+    )
+  )
+
+rds_db1_ssl =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCPS)(HOST = donghual-db1.czgnv6hdjeha.us-east-2.rds.amazonaws.com)(PORT = 2484))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SID = ORCL)
+    )
+    (SECURITY = 
+      (SSL_SERVER_CERT_DN = "C=US,ST=Washington,L=Seattle,O=Amazon.com,OU=RDS,CN=donghual-db1.czgnv6hdjeha.us-east-2.rds.amazonaws.com")
+    )
+  )
+  
