@@ -1,13 +1,13 @@
 Setup steps, please reference doc here: https://docs.oracle.com/en-us/iaas/data-safe/doc/create-self-signed-certificate-db-system-client-authentication-enabled.html
 
-#### Scenario 1: Client doesn't import Server certificate/CA amd Server doesn't import client certificate/CA.
+#### Scenario 1: Client doesn't import Server certificate/CA and Server doesn't import client certificate/CA.
 (Regardless SSL_CLIENT_AUTHENTICATION=TRUE or FALSE)
 
 Result: connection failed
 
 Message: ORA-29024: Certificate validation failure
 
-#### Scenario 2: Client import Server certificate/CA amd Server doesn't import client certificate/CA.
+#### Scenario 2: Client import Server certificate/CA and Server doesn't import client certificate/CA.
 2.1 Testing with SSL_CLIENT_AUTHENTICATION = FALSE on server
 
 Result: Success
@@ -26,7 +26,7 @@ TNS-00542: SSL Handshake failed
  TNS-12560: TNS:protocol adapter error
 ```  
 
-#### Scenario 3: Client import Server certificate/CA amd Server import client certificate/CA.
+#### Scenario 3: Client import Server certificate/CA and Server import client certificate/CA.
 (Regardless SSL_CLIENT_AUTHENTICATION=TRUE or FALSE)
 
 Result: OK
