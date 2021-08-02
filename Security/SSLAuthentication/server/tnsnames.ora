@@ -1,0 +1,8 @@
+PDB1_SSL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCPS)(HOST = ip-10-2-0-83.ap-southeast-1.compute.internal)(PORT = 2484))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = pdb1)
+    )
+  )
