@@ -1,5 +1,5 @@
 """
-Amazon Aurora Labs for MySQL
+Amazon RDS for Oracle DAS Lab
 This scripts will process the database activity stream events and printing them on the console.
 
 Dependencies:
