@@ -71,7 +71,12 @@ def decrypt_payload(payload, data_key):
 # Function to decompress payload
 def decrypt_decompress(payload, key):
     decrypted = decrypt_payload(payload, key)
-    return zlib.decompress(decrypted, zlib.MAX_WBITS + 1)
+    # Ignore error:  Error -3 while decompressing data: invalid distance too far back
+    try:
+        return zlib.decompress(decrypted, zlib.MAX_WBITS + 1)
+    except Exception:
+        pass
+
 
 # Create AWS session and clients
 session = boto3.session.Session(region_name=args.region_name)
