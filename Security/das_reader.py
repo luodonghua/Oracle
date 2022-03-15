@@ -121,6 +121,8 @@ try:
                 payload_decoded = base64.b64decode(record_data['databaseActivityEvents'])
                 data_key_decoded = base64.b64decode(record_data['key'])
                 data_key_decrypt_result = kms.decrypt(CiphertextBlob=data_key_decoded, EncryptionContext={'aws:rds:db-id': args.resource_id})
+                if decrypt_decompress(payload_decoded, data_key_decrypt_result['Plaintext']) is None:
+                    continue
                 plaintext = decrypt_decompress(payload_decoded, data_key_decrypt_result['Plaintext']).decode('utf8')
                 
                 # Decode JSON DAS record
